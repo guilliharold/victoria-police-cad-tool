@@ -1,2 +1,72 @@
-## Code (e.g., ESP) | Name (e.g., Shepparton) | Region (e.g., Eastern) | Division (e.g. Goulburn Valley) | Police Service Area (PSA) (e.g., Shepparton) |
-## E.g., EMP, Mooroopna, Eastern, Goulburn Valley, Shepparton
+# VicPol CAD Lineup Generator — Station Data
+# ─────────────────────────────────────────────────────────────────────────────
+# HOW TO USE THIS FILE
+#
+# Fill in one row per station. Lines starting with # are ignored.
+# The header row (below) must stay exactly as written.
+#
+# COLUMNS
+#   code           Station callsign prefix. Uppercase, 2–5 characters.
+#                  Format: [Region letter] + [Station abbreviation]
+#                  e.g.  E + SP = ESP (Eastern, Shepparton)
+#                        W + BI = WBI (Western, Bendigo)
+#                        N + MN = NMN (North West Metro, Melbourne North)
+#
+#   name           Station display name. Do not include "Police Station".
+#
+#   region         Single region key letter — must match one of:
+#                  N = North West Metro
+#                  S = Southern Metro
+#                  E = Eastern
+#                  W = Western
+#                  (Add new regions by also adding an <option> in index.html)
+#
+#   region_label   Full region name shown in the tool (e.g. "Eastern").
+#
+#   division       Division name shown in the dropdown
+#                  (e.g. "Goulburn Valley" or "Geelong (W201)").
+#                  Stations with the same division value are grouped together.
+#
+#   div_code       Short division reference code (e.g. GV, N101, W201).
+#                  Used for reference only — not shown to the user.
+#
+#   psa            Code of the Police Service Area station that covers
+#                  this station (e.g. ESP). Leave blank if unknown.
+#
+#   cri            Code of the Crime Desk (CRI) that services this station.
+#                  Leave blank if unknown.
+#
+#   classification Station size/role. Must be exactly one of:
+#                  small        = Small or outer station
+#                  suburban     = General suburban station (default)
+#                  hq           = Divisional headquarters
+#                  regional_hq  = Regional headquarters
+#
+# NOTES
+#   • Leave a field blank rather than writing N/A or — (just leave it empty).
+#   • If psa or cri reference another station, use that station's code value.
+#   • classification controls how many units the tool generates by default.
+#   • Stations are displayed in the order they appear in this file.
+# ─────────────────────────────────────────────────────────────────────────────
+code,name,region,region_label,division,div_code,psa,cri,classification
+# ── EASTERN — Goulburn Valley ──────────────────────────────────────────────
+ESP,Shepparton,E,Eastern,Goulburn Valley,GV,ESP,ESP,regional_hq
+EMO,Mooroopna,E,Eastern,Goulburn Valley,GV,ESP,ESP,suburban
+EYW,Yarrawonga,E,Eastern,Goulburn Valley,GV,ESP,ESP,small
+ENH,Nagambie,E,Eastern,Goulburn Valley,GV,ESP,ESP,small
+ECO,Cobram,E,Eastern,Goulburn Valley,GV,ESP,ESP,small
+# ── EASTERN — Wangaratta ───────────────────────────────────────────────────
+EWA,Wangaratta,E,Eastern,Wangaratta,WA,EWA,EWA,regional_hq
+EBN,Benalla,E,Eastern,Wangaratta,WA,EWA,EWA,suburban
+EBR,Bright,E,Eastern,Wangaratta,WA,EWA,EWA,small
+# ── WESTERN — Bendigo ──────────────────────────────────────────────────────
+WBI,Bendigo,W,Western,Bendigo,WBI,WBI,WBI,regional_hq
+WKY,Kyneton,W,Western,Bendigo,WBI,WBI,WBI,small
+WCS,Castlemaine,W,Western,Bendigo,WBI,WBI,WBI,suburban
+# ── WESTERN — Geelong ──────────────────────────────────────────────────────
+WGL,Geelong,W,Western,Geelong (W201),W201,WGL,WGL,regional_hq
+WCO,Corio,W,Western,Geelong (W201),W201,WGL,WGL,suburban
+WLA,Lara,W,Western,Geelong (W201),W201,WGL,WGL,suburban
+WTQ,Torquay,W,Western,Surf Coast (W211),W211,WTQ,WGL,suburban
+WAG,Anglesea,W,Western,Surf Coast (W211),W211,WTQ,WGL,small
+WLO,Lorne,W,Western,Surf Coast (W211),W211,WTQ,WGL,small
