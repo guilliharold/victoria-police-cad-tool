@@ -6,38 +6,38 @@ Hosted on GitHub Pages — no server, no login, no install required.
 
 ---
 
-## What This Tool Does
+## Repository Files
 
-The generator walks you through three steps to produce a suggested vehicle lineup for any police station in Victoria:
+| File | Purpose |
+|---|---|
+| `index.html` | The tool itself — open this in any browser |
+| `stations.csv` | Station database — edit this to add or update stations |
+| `README.md` | This file |
 
-1. **Select a station** — choose a region, division, and station from the dropdown menus
-2. **Select services** — tick which unit types operate from that station (e.g. Station Cars, Highway Patrol, CIU, Dog Squad)
-3. **Generate and adjust** — the tool produces a recommended lineup across all three shifts, with sliders on each service block so you can fine-tune the number of units up or down
-
-The output shows every unit's callsign, its role description, and which shift it belongs to (morning, afternoon, night, or fixed/always-on). A formatted export can be copied to clipboard for pasting into MissionChief or any notes app.
+The tool loads `stations.csv` automatically on startup. If the CSV is missing (e.g. when testing locally by double-clicking `index.html`), it falls back to the built-in placeholder data so the tool still opens without errors.
 
 ---
 
-## How to Use It
+## How to Use the Tool
 
 ### Step 1 — Station
 
-Select your **Region**, then **Division**, then **Station** from the cascading dropdowns.
+Select your **Region**, then **Division**, then **Station** from the cascading dropdowns. These are populated from `stations.csv`.
 
-Once a station is selected, a **Station Classification** card appears. Set this to match the station's real-world role:
+Once a station is selected, the **Station Classification** card appears. This is pre-filled from the CSV but can be overridden here:
 
 | Classification | When to use |
 |---|---|
 | Small / Outer Station | Small rural or remote stations with limited resources |
-| General Suburban | Standard metro or regional suburban stations |
+| General Suburban | Standard suburban or regional town stations |
 | Divisional HQ | The primary station for a division — adds Senior SGT, Div Supervisor |
-| Regional HQ | The headquarters station for a full region — adds Superintendent, Duty Officer |
+| Regional HQ | The headquarters for a full region — adds Superintendent, Duty Officer |
 
-Classification affects the default number of units generated for each service — a Regional HQ will produce more cars and CIU units than a small outer station.
+Classification controls the default number of units generated per service.
 
 ### Step 2 — Services
 
-Tick any combination of the available service types. You can select as many or as few as you like.
+Tick which unit types operate from this station.
 
 | Service | Callsign Range | Notes |
 |---|---|---|
@@ -59,245 +59,184 @@ Tick any combination of the available service types. You can select as many or a
 | Heavy Vehicle Unit | ROA prefix | Heavy vehicle compliance |
 | Mounted Branch | MOU prefix | Mounted unit, 800–899 |
 
-Command and Supervision units (Station SGT, District Patrol SGT) are always added automatically — you don't need to select them.
+Command and Supervision (Station SGT, District Patrol SGT) are always added automatically.
 
 ### Step 3 — Lineup
 
-The generated lineup shows all units grouped by service. Each unit displays:
+The generated output shows all units grouped by service. Each entry shows:
 
 - **Callsign** — e.g. `ESP311`
 - **Description** — role and shift
-- **Shift tag** — `MS` (0700), `AS` (1500), `NS` (2300), or `FIXED` (base/always-on)
+- **Shift tag** — `MS` (0700 start), `AS` (1500 start), `NS` (2300 start), or `FIXED` (base/always-on)
 
-**Callsign numbers are randomised on each generation** within the valid range for each shift, so running the generator twice on the same station will produce a different but equally valid set of numbers.
+**Callsign numbers vary on each generation** within the valid range for each shift, reflecting the flexibility Victoria Police allows in unit numbering.
 
 #### Adjusting Unit Counts
 
-Each scalable service block (Station Cars, Vans, HWP, CIU, PORT, RRU) has a **unit count slider**. Drag it left to reduce or right to increase the number of units shown. The slider always maintains a balanced spread across morning, afternoon, and night shifts — reducing from 9 cars to 3 will give you one of each shift, not three morning units.
+Each scalable service (Station Cars, Divisional Vans, HWP, CIU, PORT, RRU) has a **unit count slider**. Drag it to increase or reduce units. The slider always keeps a balanced spread across all three shifts — reducing from 9 cars to 3 always gives one per shift, not three morning units.
 
 #### Exporting
 
-At the bottom of the output page is a formatted text export. Click **Copy to Clipboard** and paste it wherever you need it. The export updates live as you adjust sliders.
+A formatted text export appears at the bottom of the output. Click **Copy to Clipboard** — it updates live as you adjust sliders.
 
 ---
 
 ## Callsign Number Logic
 
-Victoria Police callsigns follow a structured numbering system. Understanding this helps when reviewing or tweaking generated lineups.
-
-### Station Code
-
-Every callsign starts with the station code — a 2–4 character prefix derived from the region letter and a short form of the station name.
+### Station Code Format
 
 ```
-Region letter + Station abbreviation
+[Region letter] + [Station abbreviation]
 
-N  = North West Metro
-S  = Southern Metro
-E  = Eastern
-W  = Western
+N = North West Metro    S = Southern Metro
+E = Eastern             W = Western
 
 Examples:
-  Shepparton    → ESP   (Eastern + SP)
-  Bendigo       → WBI   (Western + BI)
-  Melbourne North → NMN (North + MN)
+  E + SP  →  ESP   Shepparton
+  W + BI  →  WBI   Bendigo
+  N + MN  →  NMN   Melbourne North
 ```
 
-### Number Ranges by Unit Type
+### Number Ranges
 
 ```
-100       Superintendent
-150       Duty Officer (Inspector) — region-wide
-200–299   Station Cars (general duties sedans)
-250       Station Sergeant
-251–252   District Patrol Supervisor (SGT)
-260       Senior Sergeant
-265       Divisional Supervisor (S/SGT)
-290–292   PACER / MHaP
-300–399   Divisional Vans
-440–449   Regional Response Unit (RRU)
-450–499   SOCIT / FVIU
-500–599   CIU
-570–579   Crime Desk (CRI)
-600–699   Highway Patrol
-700–799   District Support Services / PORT
-800–899   Mounted Branch
-900–929   Fixed base stations
+100         Superintendent
+150         Duty Officer (Inspector) — region-wide
+200–299     Station Cars
+250         Station Sergeant
+251–252     District Patrol Supervisor (SGT)
+260         Senior Sergeant
+265         Divisional Supervisor (S/SGT)
+290–292     PACER / MHaP
+300–399     Divisional Vans
+440–449     RRU
+450–499     SOCIT / FVIU
+500–599     CIU
+570–579     Crime Desk (CRI)
+600–699     Highway Patrol
+700–799     District Support / PORT
+800–899     Mounted Branch
+900–929     Fixed base stations
 ```
 
 ### Shift Number Convention
 
-For Station Cars and Divisional Vans, the trailing digit indicates shift start time:
+For Station Cars and Divisional Vans, the trailing digit indicates shift start:
 
 ```
-x07  →  Morning shift   (0700 start)
-x03  →  Afternoon shift (1500 start)
-x11  →  Night shift     (2300 start)
+x07  →  Morning shift   (0700)
+x03  →  Afternoon shift (1500)
+x11  →  Night shift     (2300)
+
+ESP207 = Shepparton, morning sedan
+ESP303 = Shepparton, afternoon Div Van
+ESP211 = Shepparton, night sedan
 ```
-
-So `ESP207` is a Shepparton morning shift sedan, `ESP303` is an afternoon Div Van, and `ESP211` is a night shift sedan.
-
-Additional units on the same shift increment outward from those bases (204, 208, 201 for morning; 206, 209, 202 for afternoon; 214, 217, 212 for night).
 
 ---
 
 ## Hosting on GitHub Pages
 
-1. Create a new GitHub repository (or use an existing one)
-2. Upload `index.html` (and optionally this `README.md`) to the repository root
+1. Create a new GitHub repository
+2. Upload `index.html`, `stations.csv`, and `README.md` to the root
 3. Go to **Settings → Pages**
-4. Under **Source**, select `Deploy from a branch`
-5. Set branch to `main`, folder to `/ (root)`, then click **Save**
-6. Your tool will be live at `https://yourusername.github.io/repo-name` within about 60 seconds
+4. Set Source to `Deploy from a branch`, select `main` / `root`, click **Save**
+5. Live at `https://yourusername.github.io/repo-name` within ~60 seconds
 
-To update the tool after making changes, simply replace `index.html` in the repository. You can also edit it directly in GitHub's web editor without needing any software installed locally.
+To update stations, edit `stations.csv` directly in GitHub's web editor and commit — no tools needed.
 
 ---
 
-## Adding and Editing Stations
+## Managing Stations (stations.csv)
 
-All station data is stored in a single block near the top of `index.html`. Open the file in any plain-text editor (Notepad, VS Code, Notepad++, TextEdit) and search for:
+### File Format
 
-```
-const REGION_DATA = {
-```
-
-Everything between that line and the matching closing `};` is the station database. Nothing else needs to be changed.
-
-### Data Structure
-
-Stations are organised into three levels:
+The CSV has a header row followed by one row per station. Lines beginning with `#` are comments and are ignored — use them freely for notes and section labels.
 
 ```
-Region  →  Division  →  Stations (array of strings)
+code,name,region,region_label,division,div_code,psa,cri,classification
 ```
 
-### Station String Format
+| Column | Description | Example |
+|---|---|---|
+| `code` | Station callsign prefix — uppercase, 2–5 characters | `ESP` |
+| `name` | Station display name (no "Police Station" needed) | `Shepparton` |
+| `region` | Single region letter: `N`, `S`, `E`, or `W` | `E` |
+| `region_label` | Full region name | `Eastern` |
+| `division` | Division name shown in the dropdown | `Goulburn Valley` |
+| `div_code` | Short division code for reference | `GV` |
+| `psa` | Police Service Area code covering this station | `ESP` |
+| `cri` | Crime Desk (CRI) code servicing this station | `ESP` |
+| `classification` | One of: `small`, `suburban`, `hq`, `regional_hq` | `regional_hq` |
 
-Each station is written as a single string with eight fields separated by the pipe character `|`:
+Leave a field blank if unknown — just keep the comma so column alignment stays correct:
 
-```
-'CODE|Name|DivCode|BackedBy|PSA|CIU|CRI|HWP'
-```
-
-| Position | Field | Description | Example |
-|---|---|---|---|
-| 1 | `CODE` | Station callsign prefix — uppercase, 2–5 characters | `ESP` |
-| 2 | `Name` | Station display name | `Shepparton` |
-| 3 | `DivCode` | Division code (internal reference only) | `GV` |
-| 4 | `BackedBy` | Comma-separated codes of stations that back this one | `EMO,ECO` |
-| 5 | `PSA` | Code of the Primary Support Area station | `ESP` |
-| 6 | `CIU` | Code of the CIU that services this station | `ESP` |
-| 7 | `CRI` | Code of the Crime Desk that services this station | `ESP` |
-| 8 | `HWP` | Code of the HWP that services this station | `ESP` |
-
-If a field is unknown or not applicable, **leave it blank but keep the pipe** so the field count stays at exactly 7 pipes (8 fields):
-
-```
-'EYW|Yarrawonga|GV||ESP|ESP|ESP|ESP'
-                 ↑
-         BackedBy is blank — pipe is still there
+```csv
+EYW,Yarrawonga,E,Eastern,Goulburn Valley,GV,,ESP,small
+                                            ↑↑
+                             psa blank — commas still present
 ```
 
 ---
 
-### Adding a New Station to an Existing Division
+### Adding a Station
 
-Find the relevant division array and add a new line. For example, adding **Kyabram** (`EKB`) to the Goulburn Valley division:
+Add a new row anywhere under the correct division's comment block (or anywhere — order in the file = order in the dropdown):
 
-```javascript
-'Goulburn Valley': [
-  'ESP|Shepparton|GV||ESP|ESP|ESP|ESP',
-  'EYW|Yarrawonga|GV||ESP|ESP|ESP|ESP',
-  'EMO|Mooroopna|GV||ESP|ESP|ESP|ESP',
-  'ENH|Nagambie|GV||ESP|ESP|ESP|ESP',
-  'ECO|Cobram|GV||ESP|ESP|ESP|ESP',
-  'EKB|Kyabram|GV||ESP|ESP|ESP|ESP',    ← add this line
-],
+```csv
+# ── EASTERN — Goulburn Valley
+ESP,Shepparton,E,Eastern,Goulburn Valley,GV,ESP,ESP,regional_hq
+EMO,Mooroopna,E,Eastern,Goulburn Valley,GV,ESP,ESP,suburban
+EKB,Kyabram,E,Eastern,Goulburn Valley,GV,ESP,ESP,small     ← new
 ```
-
-Save the file and reload — Kyabram will appear in the Station dropdown when Goulburn Valley is selected.
 
 ---
 
-### Adding a New Division to an Existing Region
+### Adding a New Division
 
-Inside the relevant region's `divisions` object, add a new key and array. The key string is what appears in the Division dropdown.
+Just use a new `division` value in the rows — the tool creates the dropdown group automatically:
 
-```javascript
-'Ovens & Murray': [
-  'EWA|Wangaratta|OM||EWA|EWA|EWA|EWA',
-  'EBN|Benalla|OM||EWA|EWA|EWA|EWA',
-  'EMY|Myrtleford|OM||EWA|EWA|EWA|EWA',
-],
+```csv
+EWA,Wangaratta,E,Eastern,Ovens & Murray,OM,EWA,EWA,regional_hq
+EBN,Benalla,E,Eastern,Ovens & Murray,OM,EWA,EWA,suburban
 ```
-
-You can include a division code in the key if you want it shown in the dropdown:
-`'Ovens & Murray (E403)'` — it's just a display label.
 
 ---
 
-### Adding a Whole New Region
+### Adding a New Region
 
-This requires two small changes.
+**1.** Use a new single-letter key in the `region` column:
 
-**1. Add the region data** inside `const REGION_DATA = { ... }`:
-
-```javascript
-C: {
-  label: 'Central',
-  divisions: {
-    'Loddon Campaspe': [
-      'CBG|Castlemaine|LC||CBG|CBG|CBG|CBG',
-      'CMT|Maryborough|LC||CBG|CBG|CBG|CBG',
-    ],
-  }
-},
+```csv
+CBG,Castlemaine,C,Central,Loddon Campaspe,LC,CBG,CBG,hq
+CMT,Maryborough,C,Central,Loddon Campaspe,LC,CBG,CBG,small
 ```
 
-**2. Add the dropdown option** in the HTML — search for `id="selRegion"` and add a new `<option>`:
+**2.** Add a matching `<option>` to the Region dropdown in `index.html` — search for `id="selRegion"`:
 
 ```html
-<select id="selRegion" onchange="onRegion()">
-  <option value="">— Select —</option>
-  <option value="N">North West Metro</option>
-  <option value="S">Southern Metro</option>
-  <option value="E">Eastern</option>
-  <option value="W">Western</option>
-  <option value="C">Central</option>    ← add this
-</select>
+<option value="C">Central</option>
 ```
 
-The `value` attribute (`"C"`) must exactly match the key used in `REGION_DATA`.
+The `value` must exactly match the letter used in the CSV.
 
 ---
 
-### Editing an Existing Station
+### Editing a Station
 
-To change any field, just edit the relevant string in place. For example, correcting the PSA code for Warrandyte (field 5):
-
-```javascript
-// Before
-'EWY|Warrandyte|E401|EDC|EMG|EMG|EBH|ENG',
-
-// After
-'EWY|Warrandyte|E401|EDC|EWH|EMG|EBH|ENG',
-```
-
----
+Change any field in the row. The tool picks up changes on next page load.
 
 ### Removing a Station
 
-Delete the entire line, including the trailing comma.
+Delete the row entirely.
 
----
+### Quick Checklist
 
-### Quick Checklist Before Saving
-
-- Each station string has exactly **7 pipe characters** (`|`), producing 8 fields
-- The station code is **2–5 uppercase letters**
-- Every line inside an array ends with a **comma** (`,`) — except the very last entry
-- After saving, open `index.html` in a browser and verify the dropdowns populate correctly
+- [ ] Every data row has exactly **8 commas** (9 fields)
+- [ ] `region` is a single uppercase letter matching a known region key
+- [ ] `classification` is exactly one of: `small`, `suburban`, `hq`, `regional_hq`
+- [ ] Multi-word fields containing commas are wrapped in double quotes: `"Casey, Cardinia"`
+- [ ] After saving, reload the tool and check that the station appears in the correct dropdown
 
 ---
 
