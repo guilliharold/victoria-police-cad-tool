@@ -568,98 +568,109 @@ function buildServiceGrid(){
 }
 
 // ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+
+// Fisher-Yates shuffle (in-place, returns array)
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+// Interleave pre-shuffled shift buckets into MS→AS→NS→MS→AS→NS order.
+// 'fixed' items are always appended at the end unchanged.
+function interleave(ms, as, ns, fixed=[]){
+  const out=[];
+  const max=Math.max(ms.length, as.length, ns.length);
+  for(let i=0;i<max;i++){
+    if(i<ms.length) out.push(ms[i]);
+    if(i<as.length) out.push(as[i]);
+    if(i<ns.length) out.push(ns[i]);
+  }
+  return out.concat(fixed);
+}
+
+// ═══════════════════════════════════════════════════════════
 // UNIT POOL BUILDERS
-// Pools are ordered MS → AS → NS → MS → AS → NS (interleaved)
-// so that slicing at ANY count always gives a balanced spread
-// across all three shifts, not just morning-heavy results.
+// Numbers within each shift bucket are shuffled on every call
+// so each generation produces a different but valid lineup.
+// The interleaved MS→AS→NS order is always preserved so the
+// slider gives a balanced spread at any count.
 // ═══════════════════════════════════════════════════════════
 function buildCarPool(c){
-  // Interleaved: MS, AS, NS, MS, AS, NS, MS, AS, NS, MS, AS, NS, MS, AS, NS
-  return[
-    {cs:c+'207',desc:'Station Car — Morning shift (0700)',  shifts:['MS']},
-    {cs:c+'203',desc:'Station Car — Afternoon shift (1500)',shifts:['AS']},
-    {cs:c+'211',desc:'Station Car — Night shift (2300)',    shifts:['NS']},
-    {cs:c+'204',desc:'Station Car — Morning shift (0700)',  shifts:['MS']},
-    {cs:c+'206',desc:'Station Car — Afternoon shift (1500)',shifts:['AS']},
-    {cs:c+'214',desc:'Station Car — Night shift (2300)',    shifts:['NS']},
-    {cs:c+'201',desc:'Station Car — Morning shift (0700)',  shifts:['MS']},
-    {cs:c+'209',desc:'Station Car — Afternoon shift (1500)',shifts:['AS']},
-    {cs:c+'217',desc:'Station Car — Night shift (2300)',    shifts:['NS']},
-    {cs:c+'208',desc:'Station Car — Morning shift (0700)',  shifts:['MS']},
-    {cs:c+'202',desc:'Station Car — Afternoon shift (1500)',shifts:['AS']},
-    {cs:c+'212',desc:'Station Car — Night shift (2300)',    shifts:['NS']},
-    {cs:c+'205',desc:'Station Car — Morning shift (0700)',  shifts:['MS']},
-    {cs:c+'210',desc:'Station Car — Afternoon shift (1500)',shifts:['AS']},
-    {cs:c+'215',desc:'Station Car — Night shift (2300)',    shifts:['NS']},
-  ];
+  const ms=shuffle([201,204,207,208,205].map(n=>({cs:c+n,desc:'Station Car — Morning shift (0700)',  shifts:['MS']})));
+  const as=shuffle([203,206,209,202,210].map(n=>({cs:c+n,desc:'Station Car — Afternoon shift (1500)',shifts:['AS']})));
+  const ns=shuffle([211,214,217,212,215].map(n=>({cs:c+n,desc:'Station Car — Night shift (2300)',    shifts:['NS']})));
+  return interleave(ms, as, ns);
 }
+
 function buildVanPool(c){
-  // Interleaved: MS, AS, NS, MS, AS, NS
-  return[
-    {cs:c+'307',desc:'Divisional Van — Morning shift (0700)',  shifts:['MS']},
-    {cs:c+'303',desc:'Divisional Van — Afternoon shift (1500)',shifts:['AS']},
-    {cs:c+'311',desc:'Divisional Van — Night shift (2300)',    shifts:['NS']},
-    {cs:c+'308',desc:'Divisional Van — Morning shift (0700)',  shifts:['MS']},
-    {cs:c+'304',desc:'Divisional Van — Afternoon shift (1500)',shifts:['AS']},
-    {cs:c+'312',desc:'Divisional Van — Night shift (2300)',    shifts:['NS']},
-  ];
+  const ms=shuffle([307,308].map(n=>({cs:c+n,desc:'Divisional Van — Morning shift (0700)',  shifts:['MS']})));
+  const as=shuffle([303,304].map(n=>({cs:c+n,desc:'Divisional Van — Afternoon shift (1500)',shifts:['AS']})));
+  const ns=shuffle([311,312].map(n=>({cs:c+n,desc:'Divisional Van — Night shift (2300)',    shifts:['NS']})));
+  return interleave(ms, as, ns);
 }
+
 function buildHWPPool(c){
-  // Core patrol cars interleaved first, then specialised roles, then supervisor/base
-  return[
-    {cs:c+'612',desc:'HWP Marked Car',              shifts:['MS','AS']},
-    {cs:c+'617',desc:'HWP Marked Car',              shifts:['AS','NS']},
-    {cs:c+'618',desc:'HWP Marked Car',              shifts:['NS']},
-    {cs:c+'613',desc:'HWP Marked Car',              shifts:['MS']},
-    {cs:c+'600',desc:'HWP Solo Motorcycle',         shifts:['MS','AS']},
-    {cs:c+'601',desc:'HWP Solo Motorcycle',         shifts:['AS']},
-    {cs:c+'630',desc:'HWP Q Car (unmarked)',         shifts:['MS','AS']},
-    {cs:c+'650',desc:'HWP Sergeant',                shifts:['MS','AS']},
-    {cs:c+'651',desc:'HWP Sergeant',                shifts:['NS']},
-    {cs:c+'661',desc:'HWP Senior Sergeant',         shifts:['MS']},
-    {cs:c+'906',desc:'HWP Base Station (fixed)',     shifts:['FIXED']},
+  // Patrol cars shuffled within shift groups; supervisors + base always last
+  const cars_ms=shuffle([612,613].map(n=>({cs:c+n,desc:'HWP Marked Car',shifts:['MS']})));
+  const cars_as=shuffle([617].map(n=>({cs:c+n,desc:'HWP Marked Car',shifts:['AS','NS']})));
+  const cars_ns=shuffle([618].map(n=>({cs:c+n,desc:'HWP Marked Car',shifts:['NS']})));
+  const core=interleave(cars_ms, cars_as, cars_ns);
+  // Specialty units appended in fixed order (motorcycle, Q car, SGT, S/SGT, base)
+  const extra=[
+    {cs:c+'600',desc:'HWP Solo Motorcycle',     shifts:['MS','AS']},
+    {cs:c+'601',desc:'HWP Solo Motorcycle',     shifts:['AS']},
+    {cs:c+'630',desc:'HWP Q Car (unmarked)',     shifts:['MS','AS']},
+    {cs:c+'650',desc:'HWP Sergeant',            shifts:['MS','AS']},
+    {cs:c+'651',desc:'HWP Sergeant',            shifts:['NS']},
+    {cs:c+'661',desc:'HWP Senior Sergeant',     shifts:['MS']},
+    {cs:c+'906',desc:'HWP Base Station (fixed)',shifts:['FIXED']},
   ];
+  return core.concat(extra);
 }
+
 function buildCIUPool(c){
-  // Interleaved: MS, AS, NS, MS, AS, NS … then supervisor and base last
-  return[
-    {cs:c+'507',desc:'CIU — Morning shift',              shifts:['MS']},
-    {cs:c+'503',desc:'CIU — Afternoon shift',            shifts:['AS']},
-    {cs:c+'541',desc:'CIU — Night shift',                shifts:['NS']},
-    {cs:c+'508',desc:'CIU — Morning shift (additional)', shifts:['MS']},
-    {cs:c+'520',desc:'CIU — Afternoon shift (additional)',shifts:['AS']},
-    {cs:c+'542',desc:'CIU — Night shift (additional)',   shifts:['NS']},
-    {cs:c+'504',desc:'CIU — Afternoon shift',            shifts:['AS']},
-    {cs:c+'543',desc:'CIU — Night shift',                shifts:['NS']},
-    {cs:c+'550',desc:'CIU Night Supervisor',             shifts:['NS']},
-    {cs:c+'905',desc:'CIU Base Station (fixed)',         shifts:['FIXED']},
+  // CIU numbers have specific meanings so shuffle within each shift's valid range
+  const ms=shuffle([507,508].map(n=>({cs:c+n,desc:'CIU — Morning shift',shifts:['MS']})));
+  const as=shuffle([503,504,520].map(n=>({cs:c+n,desc:'CIU — Afternoon shift',shifts:['AS']})));
+  const ns=shuffle([541,542,543].map(n=>({cs:c+n,desc:'CIU — Night shift',shifts:['NS']})));
+  const fixed=[
+    {cs:c+'550',desc:'CIU Night Supervisor',    shifts:['NS']},
+    {cs:c+'905',desc:'CIU Base Station (fixed)',shifts:['FIXED']},
   ];
+  return interleave(ms, as, ns, fixed);
 }
+
 function buildPORTPool(c){
-  // Varied shift coverage interleaved so reducing count keeps a spread
-  return[
-    {cs:c+'700',desc:'Special Duties',                          shifts:['MS','AS']},
-    {cs:c+'730',desc:'Special Events / Emergency Response',     shifts:['AS','NS']},
-    {cs:c+'740',desc:'Foot Patrol',                             shifts:['MS','AS']},
-    {cs:c+'710',desc:'Special Duties Allocation',               shifts:['MS']},
-    {cs:c+'731',desc:'Special Events / Emergency Response',     shifts:['NS']},
-    {cs:c+'741',desc:'Foot Patrol',                             shifts:['AS']},
-    {cs:c+'745',desc:'Licensing Unit',                          shifts:['MS','AS']},
-    {cs:c+'780',desc:'Bicycle Patrol',                          shifts:['MS','AS']},
-    {cs:c+'750',desc:'Special Duties',                          shifts:['MS','AS']},
-    {cs:c+'783',desc:'Court Security Guard',                    shifts:['MS','AS']},
-    {cs:c+'785',desc:'Hospital Guard',                          shifts:['MS','AS','NS']},
+  // Shuffle the special-duties numbers within each loosely-defined shift group
+  const ms=shuffle([700,710,750].map(n=>({cs:c+n,desc:'Special Duties',shifts:['MS','AS']})));
+  const as=shuffle([730,731].map(n=>({cs:c+n,desc:'Special Events / Emergency Response',shifts:['AS','NS']})));
+  const mixed=shuffle([740,741,745,780].map(n=>({cs:c+n,desc:
+    n===740||n===741?'Foot Patrol':n===745?'Licensing Unit':'Bicycle Patrol',
+    shifts:n===741?['AS']:['MS','AS']})));
+  const fixed=[
+    {cs:c+'783',desc:'Court Security Guard',                      shifts:['MS','AS']},
+    {cs:c+'785',desc:'Hospital Guard',                            shifts:['MS','AS','NS']},
     {cs:c+'920',desc:'DOSO — District Operational Support Office',shifts:['MS']},
   ];
+  // Interleave the three variable groups, then append fixed
+  return interleave(ms, as, mixed, fixed);
 }
+
 function buildRRUPool(c){
-  return[
-    {cs:c+'440',desc:'RRU — Morning shift',shifts:['MS']},
-    {cs:c+'441',desc:'RRU — Afternoon shift',shifts:['AS']},
-    {cs:c+'442',desc:'RRU — Night shift',shifts:['NS']},
-    {cs:c+'443',desc:'RRU — Additional unit',shifts:['MS','AS']},
-    {cs:c+'904',desc:'RRU Base Station (fixed)',shifts:['FIXED']},
+  // RRU numbers are tight (440–443) — shuffle the shift units, base always last
+  const ms=[{cs:c+'440',desc:'RRU — Morning shift',  shifts:['MS']}];
+  const as=[{cs:c+'441',desc:'RRU — Afternoon shift',shifts:['AS']}];
+  const ns=[{cs:c+'442',desc:'RRU — Night shift',    shifts:['NS']}];
+  const fixed=[
+    {cs:c+'443',desc:'RRU — Additional unit',       shifts:['MS','AS']},
+    {cs:c+'904',desc:'RRU Base Station (fixed)',     shifts:['FIXED']},
   ];
+  return interleave(ms, as, ns, fixed);
 }
 
 // ═══════════════════════════════════════════════════════════
