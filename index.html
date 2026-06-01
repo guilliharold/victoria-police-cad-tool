@@ -62,10 +62,10 @@
           <div class="field">
             <label>Classification</label>
             <select id="knownRole">
-              <option value="small">Small / Outer Station</option>
-              <option value="suburban" selected>General Suburban</option>
-              <option value="hq">Divisional HQ</option>
-              <option value="regional_hq">Regional HQ</option>
+              <option value="metropolitan">Metropolitan</option>
+              <option value="suburban" selected>Suburban</option>
+              <option value="regional">Regional</option>
+              <option value="rural">Rural</option>
             </select>
           </div>
           <div class="field">
@@ -513,10 +513,10 @@ function buildRRUPool(c){
 // DEFAULT COUNTS by role
 // ═══════════════════════════════════════════════════════════
 const DEFAULTS={
-  small:   {cars:3, vans:2, hwp:3,  ciu:3,  port:3,  rru:2},
-  suburban:{cars:6, vans:3, hwp:5,  ciu:5,  port:5,  rru:3},
-  hq:      {cars:9, vans:4, hwp:8,  ciu:7,  port:8,  rru:4},
-  regional_hq:{cars:12,vans:6,hwp:11,ciu:10,port:12, rru:5},
+  metropolitan: {cars:12, vans:6, hwp:11, ciu:10, port:12, rru:5},
+  suburban:     {cars:7,  vans:3, hwp:5,  ciu:5,  port:6,  rru:3},
+  regional:     {cars:9,  vans:4, hwp:8,  ciu:7,  port:8,  rru:4},
+  rural:        {cars:3,  vans:2, hwp:2,  ciu:2,  port:2,  rru:2},
 };
 const MAX_UNITS={cars:15,vans:6,hwp:11,ciu:10,port:12,rru:5};
 
@@ -539,7 +539,7 @@ function generate(){
 function buildOutput(){
   const c=S.stationCode;
   const role=S.role;
-  const roleLabel={small:'Small/Outer Station',suburban:'General Suburban',hq:'Divisional HQ',regional_hq:'Regional HQ'}[role];
+  const roleLabel={metropolitan:'Metropolitan',suburban:'Suburban',regional:'Regional',rural:'Rural'}[role]||'Suburban';
 
   const sections=[];
 
@@ -549,10 +549,10 @@ function buildOutput(){
     {cs:c+'251',desc:'District Patrol Supervisor (SGT) — Day shifts',shifts:['MS','AS']},
     {cs:c+'252',desc:'District Patrol Supervisor (SGT) — Night shift',shifts:['NS']},
   ];
-  if(role==='hq'||role==='regional_hq'){supUnits.push({cs:c+'260',desc:'Senior Sergeant',shifts:['MS','AS']});supUnits.push({cs:c+'265',desc:'Divisional Supervisor (S/SGT)',shifts:['MS']});}
-  if(role==='regional_hq'){supUnits.push({cs:c+'100',desc:'Superintendent',shifts:['MS']});supUnits.push({cs:'REG150',desc:'Duty Officer (Inspector) — Region-wide',shifts:['ALL']});}
+  if(role==='metropolitan'||role==='regional'){supUnits.push({cs:c+'260',desc:'Senior Sergeant',shifts:['MS','AS']});supUnits.push({cs:c+'265',desc:'Divisional Supervisor (S/SGT)',shifts:['MS']});}
+  if(role==='metropolitan'||role==='regional'){supUnits.push({cs:c+'100',desc:'Superintendent',shifts:['MS']});supUnits.push({cs:'REG150',desc:'Duty Officer (Inspector) — Region-wide',shifts:['ALL']});}
   sections.push({id:'_sup',icon:'⭐',name:'Command & Supervision',units:supUnits,pool:null,
-    note:'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'+(role==='hq'||role==='regional_hq'?' S/SGT (265) holds command and control responsibility.':'')});
+    note:'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'+(role==='metropolitan'||role==='regional'?' S/SGT (265) holds command and control responsibility.':'')});
 
   // SCALABLE SERVICES
   const svcDefs=[
@@ -669,7 +669,12 @@ function renderOutput(code,role,roleLabel,sections){
     return a+sec.units.length;
   },0);
 
-  const roleDesc={small:'a smaller outer station',suburban:'a general suburban station',hq:'a divisional headquarters',regional_hq:'the headquarters for the region'}[role];
+  const roleDesc={
+    metropolitan:'a metropolitan station serving a high-density urban environment',
+    suburban:'a suburban station serving an established residential and commercial community',
+    regional:'a regional hub coordinating policing across surrounding districts',
+    rural:'a rural station serving a small town and surrounding agricultural community',
+  }[role]||'a general duties station';
   let narr=`For an ideal configuration at <strong>${S.stationName} Police Station (${code})</strong>, ${roleDesc}`;
   if(S.divisionLabel)narr+=` for the <strong>${S.divisionLabel}</strong> division`;
   if(S.regionLabel)narr+=` in the <strong>${S.regionLabel} Region</strong>`;
@@ -812,7 +817,7 @@ function onSlider(svcId, rawVal){
 function rebuildExport(){
   const code=S.stationCode;
   const role=S.role;
-  const roleLabel={small:'Small/Outer Station',suburban:'General Suburban',hq:'Divisional HQ',regional_hq:'Regional HQ'}[role];
+  const roleLabel={metropolitan:'Metropolitan',suburban:'Suburban',regional:'Regional',rural:'Rural'}[role]||'Suburban';
   const sections=window._sections;
   const totalVisible=sections.reduce((a,s)=>a+(s.scalable?(OVERRIDES[s.id]||defaultCount(s.id)):s.units.length),0);
 
