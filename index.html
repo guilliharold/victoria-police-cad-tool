@@ -665,6 +665,21 @@ function shiftTag(s){
   return'';
 }
 
+// Look up a station code across all regions and return "Name (CODE)"
+// Falls back to just the code if the station isn't found (e.g. not yet in CSV)
+function resolveStationLabel(code){
+  if(!code) return '';
+  for(const reg of Object.values(REGION_DATA)){
+    for(const entries of Object.values(reg.divisions)){
+      for(const entry of entries){
+        const st = parseStation(entry);
+        if(st.code === code) return `${st.name} (${code})`;
+      }
+    }
+  }
+  return code;
+}
+
 function renderOutput(code,role,roleLabel,sections){
   const totalVisible=sections.reduce((a,sec)=>{
     if(sec.scalable)return a+(OVERRIDES[sec.id]||defaultCount(sec.id));
@@ -684,7 +699,7 @@ function renderOutput(code,role,roleLabel,sections){
 
   let linksHtml='';
   if(S.psa){
-    linksHtml=`<div class="card" style="margin-bottom:14px"><div class="card-head"><div class="dot"></div>Station Support Links</div><div class="card-body"><div class="links-grid"><div class="link-item"><div class="link-key">Police Service Area (PSA)</div><div class="link-val">${S.psa}</div></div></div></div></div>`;
+    linksHtml=`<div class="card" style="margin-bottom:14px"><div class="card-head"><div class="dot"></div>Station Support Links</div><div class="card-body"><div class="links-grid"><div class="link-item"><div class="link-key">Police Service Area (PSA)</div><div class="link-val">${resolveStationLabel(S.psa)}</div></div></div></div></div>`;
   }
 
   let blocksHtml='';
@@ -741,7 +756,7 @@ function renderOutput(code,role,roleLabel,sections){
   });
   if(S.psa){
     exp+=`STATION SUPPORT LINKS\n`;
-    exp+=`  PSA (Police Service Area) : ${S.psa}\n`;
+    exp+=`  PSA (Police Service Area) : ${resolveStationLabel(S.psa)}\n`;
   }
 
   const expDisplay=exp
@@ -828,7 +843,7 @@ function rebuildExport(){
   });
   if(S.psa){
     exp+=`STATION SUPPORT LINKS\n`;
-    exp+=`  PSA (Police Service Area) : ${S.psa}\n`;
+    exp+=`  PSA (Police Service Area) : ${resolveStationLabel(S.psa)}\n`;
   }
 
   const raw=document.getElementById('expRaw');
