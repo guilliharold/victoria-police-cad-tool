@@ -553,13 +553,17 @@ function buildOutput(){
   if(document.getElementById('superRequired').value==='yes'){
     const supUnits=[
       {cs:c+'250',desc:'Station Sergeant',shifts:['MS','AS','NS']},
-      {cs:c+'251',desc:'District Patrol Supervisor (SGT) — Day shifts',shifts:['MS','AS']},
-      {cs:c+'252',desc:'District Patrol Supervisor (SGT) — Night shift',shifts:['NS']},
+      {cs:c+'251',desc:'District Patrol Supervisor (SGT)',shifts:['MS','AS','NS']},
     ];
+    if(role!=='rural'){
+      supUnits.push({cs:c+'252',desc:'District Patrol Supervisor (SGT) — Night shift',shifts:['NS']});
+    }
     if(role==='metropolitan'||role==='regional'){supUnits.push({cs:c+'260',desc:'Senior Sergeant',shifts:['MS','AS']});supUnits.push({cs:c+'265',desc:'Divisional Supervisor (S/SGT)',shifts:['MS']});}
     if(role==='metropolitan'||role==='regional'){supUnits.push({cs:c+'100',desc:'Superintendent',shifts:['MS']});}
-    sections.push({id:'_sup',icon:'⭐',name:'Command & Supervision',units:supUnits,pool:null,
-      note:'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'+(role==='metropolitan'||role==='regional'?' S/SGT (265) holds command and control responsibility.':'')});
+    const supNote=role==='rural'
+      ?'Station SGT (250) attends incidents at the request of units already in attendance. Rural stations operate a single District Patrol SGT (251) across available shifts, subject to staffing.'
+      :'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'+(role==='metropolitan'||role==='regional'?' S/SGT (265) holds command and control responsibility.':'');
+    sections.push({id:'_sup',icon:'⭐',name:'Command & Supervision',units:supUnits,pool:null,note:supNote});
   }
 
   // SCALABLE SERVICES
