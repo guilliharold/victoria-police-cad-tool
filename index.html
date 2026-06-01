@@ -69,10 +69,10 @@
             </select>
           </div>
           <div class="field">
-            <label>Supervisor Number</label>
-            <select id="superNum">
-              <option value="251">251 (Default day)</option>
-              <option value="252">252 (Night-primary)</option>
+            <label>Supervisor Required</label>
+            <select id="superRequired">
+              <option value="yes" selected>Yes</option>
+              <option value="no">No</option>
             </select>
           </div>
         </div>
@@ -543,16 +543,18 @@ function buildOutput(){
 
   const sections=[];
 
-  // SUPERVISION (always, no slider)
-  const supUnits=[
-    {cs:c+'250',desc:'Station Sergeant',shifts:['MS','AS','NS']},
-    {cs:c+'251',desc:'District Patrol Supervisor (SGT) — Day shifts',shifts:['MS','AS']},
-    {cs:c+'252',desc:'District Patrol Supervisor (SGT) — Night shift',shifts:['NS']},
-  ];
-  if(role==='metropolitan'||role==='regional'){supUnits.push({cs:c+'260',desc:'Senior Sergeant',shifts:['MS','AS']});supUnits.push({cs:c+'265',desc:'Divisional Supervisor (S/SGT)',shifts:['MS']});}
-  if(role==='metropolitan'||role==='regional'){supUnits.push({cs:c+'100',desc:'Superintendent',shifts:['MS']});supUnits.push({cs:'REG150',desc:'Duty Officer (Inspector) — Region-wide',shifts:['ALL']});}
-  sections.push({id:'_sup',icon:'⭐',name:'Command & Supervision',units:supUnits,pool:null,
-    note:'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'+(role==='metropolitan'||role==='regional'?' S/SGT (265) holds command and control responsibility.':'')});
+  // SUPERVISION (conditional on user preference)
+  if(document.getElementById('superRequired').value==='yes'){
+    const supUnits=[
+      {cs:c+'250',desc:'Station Sergeant',shifts:['MS','AS','NS']},
+      {cs:c+'251',desc:'District Patrol Supervisor (SGT) — Day shifts',shifts:['MS','AS']},
+      {cs:c+'252',desc:'District Patrol Supervisor (SGT) — Night shift',shifts:['NS']},
+    ];
+    if(role==='metropolitan'||role==='regional'){supUnits.push({cs:c+'260',desc:'Senior Sergeant',shifts:['MS','AS']});supUnits.push({cs:c+'265',desc:'Divisional Supervisor (S/SGT)',shifts:['MS']});}
+    if(role==='metropolitan'||role==='regional'){supUnits.push({cs:c+'100',desc:'Superintendent',shifts:['MS']});}
+    sections.push({id:'_sup',icon:'⭐',name:'Command & Supervision',units:supUnits,pool:null,
+      note:'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'+(role==='metropolitan'||role==='regional'?' S/SGT (265) holds command and control responsibility.':'')});
+  }
 
   // SCALABLE SERVICES
   const svcDefs=[
@@ -697,7 +699,6 @@ function renderOutput(code,role,roleLabel,sections){
       rows+=`<div class="unit-row${hidden?' hidden-unit':''}" id="urow-${sec.id}-${idx}">
         <span class="u-cs">${u.cs}</span>
         <span class="u-desc">${u.desc}</span>
-        <div class="u-tags">${u.shifts.map(shiftTag).join('')}</div>
       </div>`;
     });
 
@@ -735,7 +736,7 @@ function renderOutput(code,role,roleLabel,sections){
   sections.forEach(sec=>{
     const count=sec.scalable?(OVERRIDES[sec.id]||defaultCount(sec.id)):sec.units.length;
     exp+=`${sec.name.toUpperCase()}\n`;
-    sec.units.slice(0,count).forEach(u=>{exp+=`  ${u.cs.padEnd(12)} ${u.desc.padEnd(36)} [${u.shifts.join('/')}]\n`;});
+    sec.units.slice(0,count).forEach(u=>{exp+=`  ${u.cs.padEnd(12)} ${u.desc}\n`;});
     exp+='\n';
   });
   if(S.psa){
@@ -762,13 +763,6 @@ function renderOutput(code,role,roleLabel,sections){
       </div>
     </div>
     <div class="narrative">${narr}</div>
-    <div class="legend">
-      <span class="legend-label">Shift key:</span>
-      <span class="tag tag-ms">MS</span> Morning (0700) &nbsp;
-      <span class="tag tag-as">AS</span> Afternoon (1500) &nbsp;
-      <span class="tag tag-ns">NS</span> Night (2300) &nbsp;
-      <span class="tag tag-fixed">FIXED</span> Base / Always-on
-    </div>
     ${linksHtml}
     ${blocksHtml}
     <div class="export-box">
@@ -829,7 +823,7 @@ function rebuildExport(){
   sections.forEach(sec=>{
     const count=sec.scalable?(OVERRIDES[sec.id]||defaultCount(sec.id)):sec.units.length;
     exp+=`${sec.name.toUpperCase()}\n`;
-    sec.units.slice(0,count).forEach(u=>{exp+=`  ${u.cs.padEnd(12)} ${u.desc.padEnd(36)} [${u.shifts.join('/')}]\n`;});
+    sec.units.slice(0,count).forEach(u=>{exp+=`  ${u.cs.padEnd(12)} ${u.desc}\n`;});
     exp+='\n';
   });
   if(S.psa){
