@@ -646,7 +646,7 @@ input[type="range"] {
 
 .unit-row {
   display: grid;
-  grid-template-columns: 120px 1fr auto;
+  grid-template-columns: 120px 1fr;
   gap: 10px;
   align-items: center;
   padding: 7px 10px;
