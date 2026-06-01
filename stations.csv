@@ -32,11 +32,11 @@
 #   psa            Code of the Police Service Area station covering this station.
 #                  Leave blank if unknown or not applicable.
 #
-#   classification Station size/role. Must be exactly one of:
-#                  small        = Small or outer station
-#                  suburban     = General suburban station (default)
-#                  hq           = Divisional headquarters
-#                  regional_hq  = Regional headquarters
+#   classification Station type. Must be exactly one of:
+#                  metropolitan = High-density urban, major population centres (e.g. Melbourne CBD precincts)
+#                  suburban     = Established metro/outer suburban station (default)
+#                  regional     = Major regional city hub coordinating surrounding districts
+#                  rural        = Small town or remote station with limited resources
 #
 # NOTES
 #   • Leave a field blank rather than writing N/A or — (just keep the comma).
@@ -66,17 +66,17 @@ TBC,Station TBC,S,Southern Metro,Dandenong (SD3),SD3,,suburban
 TBC,Station TBC,S,Southern Metro,Frankston (SD4),SD4,,suburban
 # ── EASTERN ──────────────────────────────────────────────────────────────────
 # Nunawading (ED1)
-ENG,Nunawading,E,Eastern,Nunawading (ED1),ED1,ENG,hq
+TBC,Station TBC,E,Eastern,Nunawading (ED1),ED1,,suburban
 # Knox (ED2)
-EKX,Knox,E,Eastern,Knox (ED2),ED2,EKX,hq
+TBC,Station TBC,E,Eastern,Knox (ED2),ED2,,suburban
 # Goulburn Valley (ED3)
-ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,hq
+TBC,Station TBC,E,Eastern,Goulburn Valley (ED3),ED3,,suburban
 # Wangaratta (ED4)
-EWT,Wangaratta,E,Eastern,Wangaratta (ED4),ED4,EWT,hq
+TBC,Station TBC,E,Eastern,Wangaratta (ED4),ED4,,suburban
 # Morwell (ED5)
-EML,Morwell,E,Eastern,Morwell (ED5),ED5,EML,hq
+TBC,Station TBC,E,Eastern,Morwell (ED5),ED5,,suburban
 # Bairnsdale (ED6)
-EBL,Bairnsdale,E,Eastern,Bairnsdale (ED6),ED6,EBL,hq
+TBC,Station TBC,E,Eastern,Bairnsdale (ED6),ED6,,suburban
 # ── WESTERN ──────────────────────────────────────────────────────────────────
 # Geelong (WD1)
 TBC,Station TBC,W,Western,Geelong (WD1),WD1,,suburban
