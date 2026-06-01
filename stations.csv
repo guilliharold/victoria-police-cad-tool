@@ -66,18 +66,17 @@ TBC,Station TBC,S,Southern Metro,Dandenong (SD3),SD3,,suburban
 TBC,Station TBC,S,Southern Metro,Frankston (SD4),SD4,,suburban
 # ── EASTERN ──────────────────────────────────────────────────────────────────
 # Nunawading (ED1)
-TBC,Station TBC,E,Eastern,Nunawading (ED1),ED1,,suburban
+ENG,Nunawading,E,Eastern,Nunawading (ED1),ED1,ENG,hq
 # Knox (ED2)
-TBC,Station TBC,E,Eastern,Knox (ED2),ED2,,suburban
+EKX,Knox,E,Eastern,Knox (ED2),ED2,EKX,hq
 # Goulburn Valley (ED3)
-TBC,Station TBC,E,Eastern,Goulburn Valley (ED3),ED3,,suburban
 ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,hq
 # Wangaratta (ED4)
-TBC,Station TBC,E,Eastern,Wangaratta (ED4),ED4,,suburban
+EWT,Wangaratta,E,Eastern,Wangaratta (ED4),ED4,EWT,hq
 # Morwell (ED5)
-TBC,Station TBC,E,Eastern,Morwell (ED5),ED5,,suburban
+EML,Morwell,E,Eastern,Morwell (ED5),ED5,EML,hq
 # Bairnsdale (ED6)
-TBC,Station TBC,E,Eastern,Bairnsdale (ED6),ED6,,suburban
+EBL,Bairnsdale,E,Eastern,Bairnsdale (ED6),ED6,EBL,hq
 # ── WESTERN ──────────────────────────────────────────────────────────────────
 # Geelong (WD1)
 TBC,Station TBC,W,Western,Geelong (WD1),WD1,,suburban
