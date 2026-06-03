@@ -16,7 +16,7 @@ const S = {
   psa:           '',
   hwp:           '',
   ciu:           '',
-  role:          'suburban',
+  role:          'metro_24',
   selected:      new Set(),
 };
 
@@ -97,7 +97,7 @@ function ingestCSV(text) {
     const psa            =  f[idx('psa')]             || '';
     const hwp            =  f[idx('hwp')]             || '';
     const ciu            =  f[idx('ciu')]             || '';
-    const classification =  f[idx('classification')]  || 'suburban';
+    const classification =  f[idx('classification')]  || 'metro_24';
 
     if (!code || !name || !regionKey) continue;
 
@@ -270,7 +270,7 @@ function buildServiceGrid() {
 // STEP 3 — GENERATION
 // =============================================================================
 function defaultCount(svcId) {
-  const d = DEFAULTS[S.role] || DEFAULTS.suburban;
+  const d = DEFAULTS[S.role] || DEFAULTS.metro_24;
   return d[svcId] || 3;
 }
 
@@ -285,28 +285,37 @@ function generate() {
 function buildOutput() {
   const c         = S.stationCode;
   const role      = S.role;
-  const roleLabel = { metropolitan: 'Metropolitan', suburban: 'Suburban', regional: 'Regional', rural: 'Rural' }[role] || 'Suburban';
+  const roleLabel = {
+    metro_24:       'Metropolitan (24 Hours)',
+    metro_non24:    'Metropolitan (Non-24 Hours)',
+    regional_24:    'Regional (24 Hours)',
+    regional_non24: 'Regional (Non-24 Hours)',
+  }[role] || 'Metropolitan (24 Hours)';
   const sections  = [];
 
   // ── Supervision ────────────────────────────────────────────────────────────
   if (document.getElementById('superRequired').value === 'yes') {
+    const is24hr  = (role === 'metro_24' || role === 'regional_24');
+    const isLarge = (role === 'metro_24' || role === 'regional_24');
+
     const supUnits = [
-      { cs: c + '250', desc: 'Station Sergeant',                         shifts: ['MS', 'AS', 'NS'] },
-      { cs: c + '251', desc: 'District Patrol Supervisor (SGT)',          shifts: ['MS', 'AS', 'NS'] },
+      { cs: c + '250', desc: 'Station Sergeant',                shifts: ['MS', 'AS', 'NS'] },
+      { cs: c + '251', desc: 'District Patrol Supervisor (SGT)', shifts: ['MS', 'AS', 'NS'] },
     ];
-    // 252 only for non-rural stations
-    if (role !== 'rural') {
+    // 252 only for 24-hour stations — non-24hr runs a single 251 subject to staffing
+    if (is24hr) {
       supUnits.push({ cs: c + '252', desc: 'District Patrol Supervisor (SGT) — Night shift', shifts: ['NS'] });
     }
-    if (role === 'metropolitan' || role === 'regional') {
-      supUnits.push({ cs: c + '260', desc: 'Senior Sergeant',             shifts: ['MS', 'AS'] });
+    // Senior ranks for 24-hour stations
+    if (isLarge) {
+      supUnits.push({ cs: c + '260', desc: 'Senior Sergeant',               shifts: ['MS', 'AS'] });
       supUnits.push({ cs: c + '265', desc: 'Divisional Supervisor (S/SGT)', shifts: ['MS'] });
-      supUnits.push({ cs: c + '100', desc: 'Superintendent',              shifts: ['MS'] });
+      supUnits.push({ cs: c + '100', desc: 'Superintendent',                shifts: ['MS'] });
     }
-    const supNote = role === 'rural'
-      ? 'Station SGT (250) attends incidents at the request of units already in attendance. Rural stations operate a single District Patrol SGT (251) across available shifts, subject to staffing.'
-      : 'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'
-        + (role === 'metropolitan' || role === 'regional' ? ' S/SGT (265) holds command and control responsibility.' : '');
+    const supNote = is24hr
+      ? 'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'
+        + (isLarge ? ' S/SGT (265) holds command and control responsibility.' : '')
+      : 'Station SGT (250) attends incidents at the request of units already in attendance. Non-24-hour stations operate a single District Patrol SGT (251) across available shifts, subject to staffing.';
 
     sections.push({ id: '_sup', icon: '⭐', name: 'Command & Supervision', units: supUnits, pool: null, note: supNote });
   }
@@ -487,10 +496,10 @@ function renderOutput(code, role, roleLabel, sections) {
 
   // Narrative intro paragraph
   const roleDesc = {
-    metropolitan: 'a metropolitan station serving a high-density urban environment',
-    suburban:     'a suburban station serving an established residential and commercial community',
-    regional:     'a regional hub coordinating policing across surrounding districts',
-    rural:        'a rural station serving a small town and surrounding agricultural community',
+    metro_24:       'a metropolitan 24-hour station providing continuous operational coverage within a high-density urban area',
+    metro_non24:    'a metropolitan station maintaining ongoing policing coverage without continuous 24-hour public counter staffing',
+    regional_24:    'a regional 24-hour hub providing continuous operational coverage across a large geographic area',
+    regional_non24: 'a regional station maintaining policing coverage through mobile patrols and nearby hub station support',
   }[role] || 'a general duties station';
 
   let narr = `For an ideal configuration at <strong>${S.stationName} Police Station (${code})</strong>, ${roleDesc}`;
@@ -652,7 +661,12 @@ function highlightExport(exp) {
 function rebuildExport() {
   const code      = S.stationCode;
   const role      = S.role;
-  const roleLabel = { metropolitan: 'Metropolitan', suburban: 'Suburban', regional: 'Regional', rural: 'Rural' }[role] || 'Suburban';
+  const roleLabel = {
+    metro_24:       'Metropolitan (24 Hours)',
+    metro_non24:    'Metropolitan (Non-24 Hours)',
+    regional_24:    'Regional (24 Hours)',
+    regional_non24: 'Regional (Non-24 Hours)',
+  }[role] || 'Metropolitan (24 Hours)';
   const sections  = window._sections;
 
   const exp = buildExportText(code, role, roleLabel, sections);
