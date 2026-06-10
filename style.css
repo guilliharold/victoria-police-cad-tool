@@ -342,7 +342,7 @@ input[type="range"] {
   flex: 1;
   box-sizing: border-box;
   /* Universal minimum height — all cards the same size regardless of text length */
-  min-height: 80px;
+  min-height: 52px;
 }
 
 .svc-item:hover {
