@@ -214,24 +214,6 @@ function onStation() {
   }
 }
 
-// Refresh the open/closed state of all sub-panels based on current selection.
-// Called whenever a service is toggled.
-function updateSubPanels() {
-  document.querySelectorAll('.svc-subpanel').forEach(panel => {
-    const parentId = panel.dataset.parent;
-    panel.classList.toggle('open', S.selected.has(parentId));
-  });
-}
-
-// Rebuild a single sub-option's visual state (checked/unchecked).
-function refreshSubOption(stateKey) {
-  const el = document.querySelector(`.svc-suboption[data-key="${stateKey}"]`);
-  if (!el) return;
-  const on = !!S[stateKey];
-  el.classList.toggle('on', on);
-  el.querySelector('.svc-subcheck').textContent = on ? '✓' : '';
-}
-
 function goStep2() {
   const sel = document.getElementById('selStation').value;
   if (!sel) { alert('Please select a station.'); return; }
@@ -256,32 +238,11 @@ function goStep2() {
 // =============================================================================
 // STEP 2 — SERVICE SELECTION
 // =============================================================================
-// Sub-panel definitions — services that have additional options shown inline.
-// Each entry: the parent service id, a header label, and an array of options.
-// Each option: stateKey (on S), icon, name, desc.
-const SUBPANELS = {
-  hwp: {
-    label: 'Highway Patrol — Additional Options',
-    options: [
-      {
-        stateKey: 'hwpSolo',
-        icon: '🏍️',
-        name: 'Include Solo Motorcycle',
-        desc: 'Adds station-based HWP solo motorcycle unit(s) to the lineup.',
-      },
-    ],
-  },
-  trf: {
-    label: 'State Highway Patrol — Additional Options',
-    options: [
-      {
-        stateKey: 'trfSolo',
-        icon: '🏍️',
-        name: 'Include Solo Motorcycle',
-        desc: 'Adds State Highway Patrol solo motorcycle unit(s) to the lineup.',
-      },
-    ],
-  },
+// Solo cards are injected into the grid immediately after their parent
+// when the parent is selected. They behave like regular service cards.
+const SOLO_CARDS = {
+  hwp: { id: 'hwp_solo', icon: '🏍️', name: 'Highway Patrol Solo',      stateKey: 'hwpSolo' },
+  trf: { id: 'trf_solo', icon: '🏍️', name: 'State Highway Patrol Solo', stateKey: 'trfSolo' },
 };
 
 function buildServiceGrid() {
@@ -289,12 +250,6 @@ function buildServiceGrid() {
   g.innerHTML = '';
 
   SERVICES.forEach(sv => {
-    // Each service lives in a wrapper that occupies exactly one grid cell.
-    // The sub-panel stacks below the card inside the wrapper — never in
-    // the grid itself — so it can't push other cards out of position.
-    const wrapper = document.createElement('div');
-    wrapper.className = 'svc-wrapper';
-
     // Main service card
     const el = document.createElement('div');
     el.className = 'svc-item' + (S.selected.has(sv.id) ? ' on' : '');
@@ -307,53 +262,35 @@ function buildServiceGrid() {
     el.onclick = () => {
       if (S.selected.has(sv.id)) {
         S.selected.delete(sv.id);
-        el.classList.remove('on');
-        el.querySelector('.svc-check').textContent = '';
+        // Also clear and remove the solo card if the parent is deselected
+        if (SOLO_CARDS[sv.id]) S[SOLO_CARDS[sv.id].stateKey] = false;
       } else {
         S.selected.add(sv.id);
-        el.classList.add('on');
-        el.querySelector('.svc-check').textContent = '✓';
       }
-      updateSubPanels();
+      // Rebuild the grid so the solo card appears/disappears in the right position
+      buildServiceGrid();
     };
-    wrapper.appendChild(el);
+    g.appendChild(el);
 
-    // Sub-panel sits inside the wrapper, below the card (not in the grid)
-    if (SUBPANELS[sv.id]) {
-      const def = SUBPANELS[sv.id];
-      const panel = document.createElement('div');
-      panel.className = 'svc-subpanel' + (S.selected.has(sv.id) ? ' open' : '');
-      panel.dataset.parent = sv.id;
-
-      const optionsHtml = def.options.map(opt => `
-        <div class="svc-suboption${S[opt.stateKey] ? ' on' : ''}" data-key="${opt.stateKey}">
-          <div class="svc-subcheck">${S[opt.stateKey] ? '✓' : ''}</div>
-          <div>
-            <div class="svc-suboption-name">${opt.icon} ${opt.name}</div>
-            <div class="svc-suboption-desc">${opt.desc}</div>
-          </div>
-        </div>`).join('');
-
-      panel.innerHTML = `
-        <div class="svc-subpanel-head">
-          <span class="svc-subpanel-head-icon">⚙</span>
-          <span class="svc-subpanel-head-label">${def.label}</span>
-        </div>
-        <div class="svc-subpanel-body">${optionsHtml}</div>`;
-
-      panel.querySelectorAll('.svc-suboption').forEach(optEl => {
-        optEl.onclick = (e) => {
-          e.stopPropagation();
-          const key = optEl.dataset.key;
-          S[key] = !S[key];
-          refreshSubOption(key);
-        };
-      });
-
-      wrapper.appendChild(panel);
+    // If this service is selected and has a solo card, inject it right after
+    if (SOLO_CARDS[sv.id] && S.selected.has(sv.id)) {
+      const solo   = SOLO_CARDS[sv.id];
+      const soloOn = !!S[solo.stateKey];
+      const soloEl = document.createElement('div');
+      soloEl.className = 'svc-item svc-item--solo' + (soloOn ? ' on' : '');
+      soloEl.dataset.id = solo.id;
+      soloEl.innerHTML = `
+        <div class="svc-check">${soloOn ? '✓' : ''}</div>
+        <div class="svc-text">
+          <div class="svc-name">${solo.icon} ${solo.name}</div>
+        </div>`;
+      soloEl.onclick = () => {
+        S[solo.stateKey] = !S[solo.stateKey];
+        soloEl.classList.toggle('on', S[solo.stateKey]);
+        soloEl.querySelector('.svc-check').textContent = S[solo.stateKey] ? '✓' : '';
+      };
+      g.appendChild(soloEl);
     }
-
-    g.appendChild(wrapper);
   });
 }
 
@@ -448,13 +385,13 @@ function buildOutput() {
     },
     {
       id: 'hwp', icon: '🚔', name: 'Highway Patrol',
-      pool: S.hwpSolo ? [...buildHWPPool(c), ...buildHWPSoloUnits(c)] : buildHWPPool(c),
-      note: `Local Highway Patrol uses the station code prefix. Marked cars 610–629, Q Cars (unmarked) 630–639 — one Q Car per three marked cars. Supervisors (SGT 650, S/SGT 661) appear in <strong>Command & Supervision</strong> above.${S.hwpSolo ? ' Solo motorcycle units (600–601) are included.' : ''}`,
+      pool: S.selected.has('hwp_solo') ? [...buildHWPPool(c), ...buildHWPSoloUnits(c)] : buildHWPPool(c),
+      note: `Local Highway Patrol uses the station code prefix. Marked cars 610–629, Q Cars (unmarked) 630–639 — one Q Car per three marked cars. Supervisors (SGT 650, S/SGT 661) appear in <strong>Command & Supervision</strong> above.${S.selected.has('hwp_solo') ? ' Solo motorcycle units (600–601) are included.' : ''}`,
     },
     {
       id: 'trf', icon: '🚓', name: 'State Highway Patrol',
-      pool: S.trfSolo ? [...buildTRFPool(), ...buildTRFSoloUnits()] : buildTRFPool(),
-      note: `State Highway Patrol uses the <strong>TRF</strong> prefix. Marked cars TRF610–629, Q Cars (unmarked) TRF630–639 — one Q Car per three marked cars. Supervisors (TRF650, TRF661) appear in <strong>Command & Supervision</strong> above.${S.trfSolo ? ' Solo motorcycle units (TRF600–603) are included.' : ''}`,
+      pool: S.selected.has('trf_solo') ? [...buildTRFPool(), ...buildTRFSoloUnits()] : buildTRFPool(),
+      note: `State Highway Patrol uses the <strong>TRF</strong> prefix. Marked cars TRF610–629, Q Cars (unmarked) TRF630–639 — one Q Car per three marked cars. Supervisors (TRF650, TRF661) appear in <strong>Command & Supervision</strong> above.${S.selected.has('trf_solo') ? ' Solo motorcycle units (TRF600–603) are included.' : ''}`,
     },
     {
       id: 'ciu', icon: '🔍', name: 'CIU', pool: buildCIUPool(c),
@@ -470,6 +407,20 @@ function buildOutput() {
       note: `RRU (440–449) provides operational support, allocated to specific operations or tasks. Fixed base at ${c}904.`,
     },
   ];
+
+  // HWP Solo — fixed size, only if selected
+  if (S.selected.has('hwp_solo')) sections.push({
+    id: 'hwp_solo', icon: '🏍️', name: 'Highway Patrol Solo', pool: null,
+    units: buildHWPSoloUnits(c),
+    note: `Station-based HWP solo motorcycle units use the station code prefix, range 600–609.`,
+  });
+
+  // TRF Solo — fixed size, only if selected
+  if (S.selected.has('trf_solo')) sections.push({
+    id: 'trf_solo', icon: '🏍️', name: 'State Highway Patrol Solo', pool: null,
+    units: buildTRFSoloUnits(),
+    note: `State Highway Patrol solo motorcycle units use the <strong>TRF</strong> prefix, range 600–609.`,
+  });
 
   svcDefs.forEach(def => {
     if (!S.selected.has(def.id)) return;
