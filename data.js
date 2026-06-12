@@ -84,8 +84,10 @@ function parseStation(s) {
 const SERVICES = [
   { id: 'cars',    icon: '🚗', name: 'Station Cars',             desc: 'General duties sedans. 200–299.' },
   { id: 'vans',    icon: '🚐', name: 'Divisional Vans',          desc: 'Cage vans for prisoner transport. 300–399.' },
-  { id: 'hwp',     icon: '🚔', name: 'Highway Patrol',            desc: 'Local HWP — marked & unmarked cars plus solo motorcycle. Station code, 600–669.' },
-  { id: 'trf',     icon: '🚓', name: 'State Highway Patrol',      desc: 'State HWP — marked, unmarked and solo motorcycle. TRF prefix, 600–669.' },
+  { id: 'hwp',     icon: '🚔', name: 'Highway Patrol',            desc: 'Local HWP — marked & unmarked cars. Station code, 610–669.' },
+  { id: 'hwp_solo',icon: '🏍️', name: 'Highway Patrol Solo',         desc: 'Station-based solo motorcycle. Station code, 600–609.' },
+  { id: 'trf',     icon: '🚓', name: 'State Highway Patrol',      desc: 'State HWP — marked & unmarked cars. TRF prefix, 610–669.' },
+  { id: 'trf_solo',icon: '🏍️', name: 'State Highway Patrol Solo',  desc: 'State HWP solo motorcycle. TRF prefix, 600–609.' },
   { id: 'port',    icon: '🛡️', name: 'PORT',                      desc: 'Public Order Response Team. POR prefix, 600–899.' },
   { id: 'dss',     icon: '🔰', name: 'District Support Services',  desc: 'Support & special duties units. Station code, 700–899.' },
   { id: 'ciu',     icon: '🔍', name: 'CIU',                      desc: 'Criminal Investigation Unit. 500–599.' },
@@ -112,16 +114,16 @@ const SERVICES = [
 // regional_24   — Regional, 24-hour hub station (e.g. Bendigo, Geelong)
 // regional_non24— Regional, non-24-hour station (e.g. Bright, Yarrawonga)
 const DEFAULTS = {
-  metro_24:       { cars: 12, vans: 6, hwp: 10, trf: 10, ciu: 10, dss: 12, rru: 5 },
-  metro_non24:    { cars: 7,  vans: 3, hwp: 5,  trf: 5,  ciu: 5,  dss: 6,  rru: 3 },
-  regional_24:    { cars: 9,  vans: 4, hwp: 7,  trf: 6,  ciu: 7,  dss: 8,  rru: 4 },
-  regional_non24: { cars: 3,  vans: 2, hwp: 2,  trf: 2,  ciu: 2,  dss: 2,  rru: 2 },
-  regional_single:{ cars: 1,  vans: 1, hwp: 1,  trf: 1,  ciu: 1,  dss: 1,  rru: 1 },
+  metro_24:       { cars: 12, vans: 6, hwp: 10, trf: 10, ciu: 10, rru: 5 },
+  metro_non24:    { cars: 7,  vans: 3, hwp: 5,  trf: 5,  ciu: 5,  rru: 3 },
+  regional_24:    { cars: 9,  vans: 4, hwp: 7,  trf: 6,  ciu: 7,  rru: 4 },
+  regional_non24: { cars: 3,  vans: 2, hwp: 2,  trf: 2,  ciu: 2,  rru: 2 },
+  regional_single:{ cars: 1,  vans: 1, hwp: 1,  trf: 1,  ciu: 1,  rru: 1 },
 };
 
 // Maximum units each scalable service pool can produce.
 // Should match the pool sizes in the builders below.
-const MAX_UNITS = { cars: 15, vans: 6, hwp: 12, trf: 12, ciu: 10, dss: 12, rru: 5 };
+const MAX_UNITS = { cars: 15, vans: 6, hwp: 24, trf: 24, ciu: 10, rru: 5 };
 
 
 // =============================================================================
@@ -174,40 +176,61 @@ function buildVanPool(c) {
   return interleave(ms, as, ns);
 }
 
-// buildHWPPool — returns patrol units only (no supervisors, no solos).
-// Supervisors are injected into Command & Supervision at generation time.
-// Solo units are appended separately if the user opts in.
-// Pool pattern: marked(MS), marked(AS), marked(NS), Q(any), repeat.
-// At any slider count this gives exactly 1 Q car per 3 marked cars.
+// buildHWPPool — patrol cars, Q cars, complaints, special duties, SGT/S/SGT.
+// Pattern: MS, AS, NS, Q repeating (1 Q per 3 marked).
+// Supervisors, complaints and special duties appear at progressively higher counts.
 function buildHWPPool(c) {
-  const ms = shuffle([611, 612, 613, 614].map(n => ({ cs: c + n, desc: 'HWP Marked Car',       shifts: ['MS'] })));
-  const as = shuffle([616, 617, 618, 619].map(n => ({ cs: c + n, desc: 'HWP Marked Car',       shifts: ['AS'] })));
-  const ns = shuffle([621, 622, 623, 624].map(n => ({ cs: c + n, desc: 'HWP Marked Car',       shifts: ['NS'] })));
-  const q  = shuffle([630, 631, 632, 633].map(n => ({ cs: c + n, desc: 'HWP Q Car (unmarked)', shifts: ['MS', 'AS'] })));
-  // Strict 3-marked-then-1-Q pattern: MS, AS, NS, Q, MS, AS, NS, Q ...
+  const ms  = shuffle([611, 612, 613, 614].map(n => ({ cs: c + n, desc: 'HWP Marked Car',          shifts: ['MS'] })));
+  const as  = shuffle([616, 617, 618, 619].map(n => ({ cs: c + n, desc: 'HWP Marked Car',          shifts: ['AS'] })));
+  const ns  = shuffle([621, 622, 623, 624].map(n => ({ cs: c + n, desc: 'HWP Marked Car',          shifts: ['NS'] })));
+  const q   = shuffle([630, 631, 632, 633].map(n => ({ cs: c + n, desc: 'HWP Q Car (unmarked)',    shifts: ['MS', 'AS'] })));
+  const cmp = shuffle([640, 641, 642, 643].map(n => ({ cs: c + n, desc: 'HWP Complaints',          shifts: ['MS', 'AS'] })));
+  const spd = shuffle([670, 671, 672, 673, 674, 675].map(n => ({ cs: c + n, desc: 'HWP Special Duties', shifts: ['MS', 'AS'] })));
+  const sgt = [
+    { cs: c + shuffle([650, 651, 652, 653])[0], desc: 'HWP Sergeant',        shifts: ['MS', 'AS'] },
+    { cs: c + shuffle([654, 655, 656, 657])[0], desc: 'HWP Sergeant',        shifts: ['NS'] },
+    { cs: c + shuffle([660, 661, 662, 663])[0], desc: 'HWP Senior Sergeant', shifts: ['MS'] },
+  ];
   return [
-    ms[0], as[0], ns[0], q[0],
-    ms[1], as[1], ns[1], q[1],
-    ms[2], as[2], ns[2], q[2],
+    ms[0], as[0], ns[0], q[0],   //  1–4  : core patrol
+    ms[1], as[1], ns[1], q[1],   //  5–8
+    ms[2], as[2], ns[2], q[2],   //  9–12
+    ms[3], as[3], ns[3], q[3],   // 13–16 : extended patrol
+    ...sgt,                       // 17–19 : supervisors
+    cmp[0], cmp[1],              // 20–21 : complaints
+    spd[0], spd[1],              // 22–23 : special duties
+    { cs: c + '906', desc: 'HWP Base Station (fixed)', shifts: ['FIXED'] },
   ];
 }
 
 // HWP solo — built separately; appended only when user opts in
 function buildHWPSoloUnits(c) {
-  return shuffle([600, 601]).map(n => ({ cs: c + n, desc: 'HWP Solo Motorcycle', shifts: ['MS', 'AS'] }));
+  return shuffle([600, 601, 602, 603]).map(n => ({ cs: c + n, desc: 'HWP Solo Motorcycle', shifts: ['MS', 'AS'] }));
 }
 
-// buildTRFPool — patrol units only (no supervisors, no solos).
-// Same 3-marked-then-1-Q pattern as HWP for consistency.
+// buildTRFPool — same structure as HWP but with TRF prefix.
+// Supervisors, complaints and special duties at higher slider counts.
 function buildTRFPool() {
-  const ms = shuffle([611, 612, 613, 614].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',       shifts: ['MS'] })));
-  const as = shuffle([616, 617, 618, 619].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',       shifts: ['AS'] })));
-  const ns = shuffle([621, 622, 623, 624].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',       shifts: ['NS'] })));
-  const q  = shuffle([630, 631, 632, 633].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Q Car (unmarked)', shifts: ['MS', 'AS'] })));
+  const ms  = shuffle([611, 612, 613, 614].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',          shifts: ['MS'] })));
+  const as  = shuffle([616, 617, 618, 619].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',          shifts: ['AS'] })));
+  const ns  = shuffle([621, 622, 623, 624].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',          shifts: ['NS'] })));
+  const q   = shuffle([630, 631, 632, 633].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Q Car (unmarked)',    shifts: ['MS', 'AS'] })));
+  const cmp = shuffle([640, 641, 642, 643].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Complaints',          shifts: ['MS', 'AS'] })));
+  const spd = shuffle([670, 671, 672, 673, 674, 675].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Special Duties', shifts: ['MS', 'AS'] })));
+  const sgt = [
+    { cs: 'TRF' + shuffle([650, 651, 652, 653])[0], desc: 'State Highway Patrol — Sergeant',        shifts: ['MS', 'AS'] },
+    { cs: 'TRF' + shuffle([654, 655, 656, 657])[0], desc: 'State Highway Patrol — Sergeant',        shifts: ['NS'] },
+    { cs: 'TRF' + shuffle([660, 661, 662, 663])[0], desc: 'State Highway Patrol — Senior Sergeant', shifts: ['MS'] },
+  ];
   return [
     ms[0], as[0], ns[0], q[0],
     ms[1], as[1], ns[1], q[1],
     ms[2], as[2], ns[2], q[2],
+    ms[3], as[3], ns[3], q[3],
+    ...sgt,
+    cmp[0], cmp[1],
+    spd[0], spd[1],
+    { cs: 'TRF906', desc: 'State Highway Patrol Base (fixed)', shifts: ['FIXED'] },
   ];
 }
 
