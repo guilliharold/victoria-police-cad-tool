@@ -87,7 +87,6 @@ const SERVICES = [
   { id: 'hwp',     icon: '🚔', name: 'Highway Patrol',            desc: 'Local HWP — marked & unmarked cars. Station code, 610–669.' },
   { id: 'trf',     icon: '🚓', name: 'State Highway Patrol',      desc: 'State HWP — marked & unmarked cars. TRF prefix, 610–669.' },
   { id: 'port',    icon: '🛡️', name: 'PORT',                      desc: 'Public Order Response Team. POR prefix, 600–899.' },
-  { id: 'dss',     icon: '🔰', name: 'District Support Services',  desc: 'Support & special duties units. Station code, 700–899.' },
   { id: 'ciu',     icon: '🔍', name: 'CIU',                      desc: 'Criminal Investigation Unit. 500–599.' },
   { id: 'fviu',    icon: '🏠', name: 'FVIU',                     desc: 'Family Violence Investigation Unit. 480–499.' },
   { id: 'socit',   icon: '👶', name: 'SOCIT',                    desc: 'Sexual Offences & Child Investigations. 450–499.' },
