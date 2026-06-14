@@ -92,8 +92,10 @@ TBC,Station TBC,E,Eastern,Nunawading (ED1),ED1,,,,metro_24
 # Knox (ED2)
 TBC,Station TBC,E,Eastern,Knox (ED2),ED2,,,,metro_24
 # Goulburn Valley (ED3)
+EDI,Dookie,E,Eastern,Goulburn Valley (ED3),ED3,ESP,ESP,ESP,regional_single
 EMP,Mooroopna,E,Eastern,Goulburn Valley (ED3),ED3,ESP,ESP,ESP,regional_non24
 ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,ESP,ESP,regional_24
+ETT,Tatura,E,Eastern,Goulburn Valley (ED3),ED3,ESP,ESP,ESP,regional_non24
 # Wangaratta (ED4)
 ECB,Cobram,E,Eastern,Wangaratta (ED4),ED4,EWT,ECB,ECB,regional_non24
 EKT,Katamatite,E,Eastern,Wangaratta (ED4),ED4,EWT,ECB,ECB,regional_single
@@ -116,6 +118,10 @@ TBC,Station TBC,W,Western,Ballarat (WD3),WD3,,,,metro_24
 # Horsham (WD4)
 TBC,Station TBC,W,Western,Horsham (WD4),WD4,,,,metro_24
 # Bendigo (WD5)
-TBC,Station TBC,W,Western,Bendigo (WD5),WD5,,,,metro_24
+WAX,Axedale,W,Western,Bendigo (WD5),WD5,WBI,WBI,WBI,regional_single
+WBI,Bendigo,W,Western,Bendigo (WD5),WD5,WBI,WBI,WBI,regional_24
+WEH,Eaglehawk,W,Western,Bendigo (WD5),WD5,WBI,WBI,WBI,regional_non24
+WGN,Goornong,W,Western,Bendigo (WD5),WD5,WBI,WBI,WBI,regional_single
+WRA,Raywood,W,Western,Bendigo (WD5),WD5,WBI,WBI,WBI,regional_single
 # Mildura (WD6)
 TBC,Station TBC,W,Western,Mildura (WD6),WD6,,,,metro_24
