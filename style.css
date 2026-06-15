@@ -747,6 +747,11 @@ input[type="range"] {
   gap: 8px;
 }
 
+/* When there are many links, allow wrapping gracefully */
+.links-grid .link-item {
+  min-width: 0;
+}
+
 @media (max-width: 500px) {
   .links-grid { grid-template-columns: 1fr 1fr; }
 }
