@@ -559,16 +559,39 @@ function renderOutput(code, role, roleLabel, sections) {
   narr += `, the following vehicle lineup is suggested. Units are listed across all shifts — morning (0700), afternoon (1500) and night (2300) crews may appear together. Use the <strong>unit count sliders</strong> on each service block to adjust numbers up or down.`;
 
   // Station support links card
+  // Group 1 — CSV-sourced station references (PSA, HWP, CIU)
+  const csvLinks = [
+    S.psa ? `<div class="link-item"><div class="link-key">Police Service Area (PSA)</div><div class="link-val">${resolveStationLabel(S.psa)}</div></div>` : '',
+    S.hwp ? `<div class="link-item"><div class="link-key">Highway Patrol (HWP)</div><div class="link-val">${resolveStationLabel(S.hwp)}</div></div>` : '',
+    S.ciu ? `<div class="link-item"><div class="link-key">Crime Investigation Unit (CIU)</div><div class="link-val">${resolveStationLabel(S.ciu)}</div></div>` : '',
+  ].filter(Boolean);
+
+  // Group 2 — specialist services selected by the user for this lineup
+  const specialistDefs = [
+    { id: 'trf',     label: 'State Highway Patrol',                  identifier: 'TRF prefix' },
+    { id: 'port',    label: 'Public Order Response Team (PORT)',      identifier: 'POR prefix' },
+    { id: 'fviu',    label: 'Family Violence Investigation Unit',     identifier: 'FVIU'       },
+    { id: 'socit',   label: 'Sexual Offences & Child Investigations', identifier: 'REG prefix' },
+    { id: 'rru',     label: 'Regional Response Unit',                identifier: 'RRU'        },
+    { id: 'dog',     label: 'Dog Squad',                             identifier: 'CAN prefix' },
+    { id: 'sar',     label: 'Search & Rescue',                       identifier: 'RES prefix' },
+    { id: 'sog',     label: 'Special Operations Group',              identifier: 'SCY prefix' },
+    { id: 'cirt',    label: 'Critical Incident Response Team',       identifier: 'CIR prefix' },
+    { id: 'polair',  label: 'Air Wing',                              identifier: 'POLAIR'     },
+    { id: 'hviu',    label: 'Heavy Vehicle Unit',                    identifier: 'ROA prefix' },
+    { id: 'mounted', label: 'Mounted Branch',                        identifier: 'MOU prefix' },
+  ];
+
+  const specialistLinks = specialistDefs
+    .filter(def => S.selected.has(def.id))
+    .map(def => `<div class="link-item"><div class="link-key">${def.label}</div><div class="link-val">${def.identifier}</div></div>`);
+
+  const allLinks = [...csvLinks, ...specialistLinks];
   let linksHtml = '';
-  if (S.psa || S.hwp || S.ciu) {
-    const linkItems = [
-      S.psa ? `<div class="link-item"><div class="link-key">Police Service Area (PSA)</div><div class="link-val">${resolveStationLabel(S.psa)}</div></div>` : '',
-      S.hwp ? `<div class="link-item"><div class="link-key">Highway Patrol (HWP)</div><div class="link-val">${resolveStationLabel(S.hwp)}</div></div>` : '',
-      S.ciu ? `<div class="link-item"><div class="link-key">Crime Investigation Unit (CIU)</div><div class="link-val">${resolveStationLabel(S.ciu)}</div></div>` : '',
-    ].filter(Boolean).join('');
+  if (allLinks.length > 0) {
     linksHtml = `<div class="card" style="margin-bottom:14px">
       <div class="card-head"><div class="dot"></div>Station Support Links</div>
-      <div class="card-body"><div class="links-grid">${linkItems}</div></div>
+      <div class="card-body"><div class="links-grid">${allLinks.join('')}</div></div>
     </div>`;
   }
 
@@ -690,11 +713,32 @@ function buildExportText(code, role, roleLabel, sections) {
     exp += '\n';
   });
 
-  if (S.psa || S.hwp || S.ciu) {
+  const expSpecialistDefs = [
+    { id: 'trf',     label: 'State Highway Patrol',                  identifier: 'TRF prefix' },
+    { id: 'port',    label: 'Public Order Response Team (PORT)',      identifier: 'POR prefix' },
+    { id: 'fviu',    label: 'Family Violence Investigation Unit',     identifier: 'FVIU'       },
+    { id: 'socit',   label: 'Sexual Offences & Child Investigations', identifier: 'REG prefix' },
+    { id: 'rru',     label: 'Regional Response Unit',                identifier: 'RRU'        },
+    { id: 'dog',     label: 'Dog Squad',                             identifier: 'CAN prefix' },
+    { id: 'sar',     label: 'Search & Rescue',                       identifier: 'RES prefix' },
+    { id: 'sog',     label: 'Special Operations Group',              identifier: 'SCY prefix' },
+    { id: 'cirt',    label: 'Critical Incident Response Team',       identifier: 'CIR prefix' },
+    { id: 'polair',  label: 'Air Wing',                              identifier: 'POLAIR'     },
+    { id: 'hviu',    label: 'Heavy Vehicle Unit',                    identifier: 'ROA prefix' },
+    { id: 'mounted', label: 'Mounted Branch',                        identifier: 'MOU prefix' },
+  ];
+  const hasSpecialist = expSpecialistDefs.some(def => S.selected.has(def.id));
+
+  if (S.psa || S.hwp || S.ciu || hasSpecialist) {
     exp += `STATION SUPPORT LINKS\n`;
     if (S.psa) exp += `  Police Service Area (PSA)     : ${resolveStationLabel(S.psa)}\n`;
     if (S.hwp) exp += `  Highway Patrol (HWP)          : ${resolveStationLabel(S.hwp)}\n`;
     if (S.ciu) exp += `  Crime Investigation Unit (CIU) : ${resolveStationLabel(S.ciu)}\n`;
+    expSpecialistDefs
+      .filter(def => S.selected.has(def.id))
+      .forEach(def => {
+        exp += `  ${def.label.padEnd(38)}: ${def.identifier}\n`;
+      });
   }
 
   return exp;
