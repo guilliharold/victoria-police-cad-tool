@@ -92,24 +92,28 @@ TBC,Station TBC,E,Eastern,Nunawading (ED1),ED1,,,,metro_24
 # Knox (ED2)
 TBC,Station TBC,E,Eastern,Knox (ED2),ED2,,,,metro_24
 # Goulburn Valley (ED3)
-EMP,Mooroopna,E,Eastern,Goulburn Valley (ED3),ED3,ESP,ESP,ESP,regional_non24
+EBN,Benalla,E,Eastern,Goulburn Valley (ED3),ED3,EBN,EBN,EBN,regional_24
+EMS,Mansfield,E,Eastern,Goulburn Valley (ED3),ED3,EMS,EMS,EMS,regional_non24
+ESY,Seymour,E,Eastern,Goulburn Valley (ED3),ED3,ESY,ESY,ESY,regional_24
 ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,ESP,ESP,regional_24
 # Wangaratta (ED4)
 EWT,Wangaratta,E,Eastern,Wangaratta (ED4),ED4,EWT,EWT,EWT,regional_24
+EWO,Wodonga,,E,Eastern,Wangaratta (ED4),ED4,EWO,EWO,EWO,regional_24
 # Morwell (ED5)
 TBC,Station TBC,E,Eastern,Morwell (ED5),ED5,,,,metro_24
 # Bairnsdale (ED6)
 TBC,Station TBC,E,Eastern,Bairnsdale (ED6),ED6,,,,metro_24
 # ── WESTERN ──────────────────────────────────────────────────────────────────
 # Geelong (WD1)
-WGL,Geelong,W,Western,Geelong (WD1),WD1,WGL,WGL,WGL,regional_24
+TBC,Station TBC,Western,Geelong (WD1),WD1,,,,regional_24
 # Warrnambool (WD2)
-WWR,Warrnambool,W,Western,Warrnambool (WD2),WD2,WWR,WWR,WWR,regional_24
+TBC,Station TBC,W,Western,Warrnambool (WD2),WD2,,,,regional_24
 # Ballarat (WD3)
-WBW,Ballarat West,W,Western,Ballarat (WD3),WD3,WBW,WBW,WBW,regional_24
+WBA,Ballarat,W,Western,Ballarat (WD3),WD3,WBA,WBA,WBA,regional_non24
+WBW,Ballarat West,W,Western,Ballarat (WD3),WD3,WBA,WBA,WBA,regional_24
 # Horsham (WD4)
-WHM,Horsham,W,Western,Horsham (WD4),WD4,WHM,WHM,WHM,regional_24
+TBC,Station TBC,Western,Horsham (WD4),,,,,regional_non24
 # Bendigo (WD5)
 WBI,Bendigo,W,Western,Bendigo (WD5),WD5,WBI,WBI,WBI,regional_24
 # Mildura (WD6)
-WML,Mildura,W,Western,Mildura (WD6),WD6,WML,WML,WML,regional_24
+TBC,Station TBC,Western,Mildura (WD6),WD6,,,,regional_24
