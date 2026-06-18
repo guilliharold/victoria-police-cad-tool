@@ -120,7 +120,7 @@ const DEFAULTS = {
 
 // Maximum units each scalable service pool can produce.
 // Should match the pool sizes in the builders below.
-const MAX_UNITS = { cars: 15, vans: 6, hwp: 24, trf: 24, ciu: 10, rru: 5 };
+const MAX_UNITS = { cars: 15, vans: 6, hwp: 24, trf: 24, ciu: 11, rru: 5 };
 
 
 // =============================================================================
@@ -160,13 +160,15 @@ function interleave(ms, as, ns, fixed = []) {
 // =============================================================================
 
 function buildCarPool(c) {
-  const ms = shuffle([201, 204, 207, 208, 205].map(n => ({ cs: c + n, desc: 'Station Car — Morning shift (0700)',   shifts: ['MS'] })));
-  const as = shuffle([203, 206, 209, 202, 210].map(n => ({ cs: c + n, desc: 'Station Car — Afternoon shift (1500)', shifts: ['AS'] })));
-  const ns = shuffle([211, 214, 217, 212, 215].map(n => ({ cs: c + n, desc: 'Station Car — Night shift (2300)',     shifts: ['NS'] })));
+  // CAD doc: 207=MS anchor, 203=AS anchor, 211=NS anchor. Additional units spread within 200–299.
+  const ms = shuffle([207, 208, 209, 204, 205].map(n => ({ cs: c + n, desc: 'Station Car — Morning shift (0700)',   shifts: ['MS'] })));
+  const as = shuffle([203, 202, 206, 201, 210].map(n => ({ cs: c + n, desc: 'Station Car — Afternoon shift (1500)', shifts: ['AS'] })));
+  const ns = shuffle([211, 212, 213, 214, 215].map(n => ({ cs: c + n, desc: 'Station Car — Night shift (2300)',     shifts: ['NS'] })));
   return interleave(ms, as, ns);
 }
 
 function buildVanPool(c) {
+  // CAD doc: 307=MS anchor, 303=AS anchor, 311=NS anchor.
   const ms = shuffle([307, 308].map(n => ({ cs: c + n, desc: 'Divisional Van — Morning shift (0700)',   shifts: ['MS'] })));
   const as = shuffle([303, 304].map(n => ({ cs: c + n, desc: 'Divisional Van — Afternoon shift (1500)', shifts: ['AS'] })));
   const ns = shuffle([311, 312].map(n => ({ cs: c + n, desc: 'Divisional Van — Night shift (2300)',     shifts: ['NS'] })));
@@ -239,9 +241,10 @@ function buildTRFSoloUnits() {
 }
 
 function buildCIUPool(c) {
-  const ms = shuffle([507, 508].map(n =>        ({ cs: c + n, desc: 'CIU — Morning shift',   shifts: ['MS'] })));
-  const as = shuffle([503, 504, 520].map(n =>   ({ cs: c + n, desc: 'CIU — Afternoon shift', shifts: ['AS'] })));
-  const ns = shuffle([541, 542, 543].map(n =>   ({ cs: c + n, desc: 'CIU — Night shift',     shifts: ['NS'] })));
+  // CAD doc: MS=507, AS=503/520, NS=541–546, night supervisor=550, base=905.
+  const ms = [{ cs: c + '507', desc: 'CIU — Morning shift',   shifts: ['MS'] }];
+  const as = shuffle([503, 520].map(n =>        ({ cs: c + n, desc: 'CIU — Afternoon shift', shifts: ['AS'] })));
+  const ns = shuffle([541, 542, 543, 544, 545, 546].map(n => ({ cs: c + n, desc: 'CIU — Night shift', shifts: ['NS'] })));
   const fixed = [
     { cs: c + '550', desc: 'CIU Night Supervisor',     shifts: ['NS'] },
     { cs: c + '905', desc: 'CIU Base Station (fixed)', shifts: ['FIXED'] },
