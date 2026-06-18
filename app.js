@@ -330,42 +330,80 @@ function buildOutput() {
   const sections  = [];
 
   // ── Supervision ────────────────────────────────────────────────────────────
-  if (document.getElementById('superRequired').value === 'yes') {
-    const is24hr  = (role === 'metro_24' || role === 'regional_24');
-    const isLarge = (role === 'metro_24' || role === 'regional_24');
+  // Builds the base station supervisor units, then collects SUP-tagged units
+  // from every selected service and appends them here too.
+  {
+    const is24hr         = (role === 'metro_24' || role === 'regional_24');
+    const isLarge        = (role === 'metro_24' || role === 'regional_24');
     const isSingleMember = (role === 'regional_single');
+    const superRequired  = document.getElementById('superRequired').value === 'yes';
 
-    let supUnits;
-    let supNote;
-    if (isSingleMember) {
-      // Single member stations carry a 251 only — no 250, no 252, no senior ranks
-      supUnits = [
-        { cs: c + '251', desc: 'District Patrol Supervisor (SGT)', shifts: ['MS', 'AS', 'NS'] },
-      ];
-      supNote = 'Single member stations carry a single District Patrol SGT (251). There is no on-site Station SGT — supervision is coordinated from the nearest regional hub.';
-    } else {
-      supUnits = [
-        { cs: c + '250', desc: 'Station Sergeant',                shifts: ['MS', 'AS', 'NS'] },
-        { cs: c + '251', desc: 'District Patrol Supervisor (SGT)', shifts: ['MS', 'AS', 'NS'] },
-      ];
-      // 252 only for 24-hour stations — non-24hr runs a single 251 subject to staffing
-      if (is24hr) {
-        supUnits.push({ cs: c + '252', desc: 'District Patrol Supervisor (SGT)', shifts: ['MS', 'AS', 'NS'] });
+    let supUnits = [];
+    let supNote  = '';
+
+    if (superRequired) {
+      if (isSingleMember) {
+        supUnits = [
+          { cs: c + '251', desc: 'District Patrol Supervisor (SGT)', shifts: ['MS', 'AS', 'NS'] },
+        ];
+        supNote = 'Single member stations carry a single District Patrol SGT (251). There is no on-site Station SGT — supervision is coordinated from the nearest regional hub.';
+      } else {
+        supUnits = [
+          { cs: c + '250', desc: 'Station Sergeant',                 shifts: ['MS', 'AS', 'NS'] },
+          { cs: c + '251', desc: 'District Patrol Supervisor (SGT)', shifts: ['MS', 'AS', 'NS'] },
+        ];
+        if (is24hr) {
+          supUnits.push({ cs: c + '252', desc: 'District Patrol Supervisor (SGT)', shifts: ['MS', 'AS', 'NS'] });
+        }
+        if (isLarge) {
+          supUnits.push({ cs: c + '260', desc: 'Senior Sergeant',               shifts: ['MS', 'AS'] });
+          supUnits.push({ cs: c + '265', desc: 'Divisional Supervisor (S/SGT)', shifts: ['MS'] });
+        }
+        supNote = is24hr
+          ? 'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'
+            + (isLarge ? ' S/SGT (265) holds command and control responsibility.' : '')
+          : 'Station SGT (250) attends incidents at the request of units already in attendance. Non-24-hour stations operate a single District Patrol SGT (251) across available shifts, subject to staffing.';
       }
-      // Senior ranks for 24-hour stations
-      if (isLarge) {
-        supUnits.push({ cs: c + '260', desc: 'Senior Sergeant',               shifts: ['MS', 'AS'] });
-        supUnits.push({ cs: c + '265', desc: 'Divisional Supervisor (S/SGT)', shifts: ['MS'] });
-      }
-      supNote = is24hr
-        ? 'Station SGT (250) attends incidents at the request of units already in attendance. District Patrol SGT (251/252) remains on mobile patrol for the duration of the shift.'
-          + (isLarge ? ' S/SGT (265) holds command and control responsibility.' : '')
-        : 'Station SGT (250) attends incidents at the request of units already in attendance. Non-24-hour stations operate a single District Patrol SGT (251) across available shifts, subject to staffing.';
     }
 
+    // Collect supervisor units from all selected services and append them
+    // (SUP-tagged units are defined in each service's pool/unit list)
+    // We build all service unit lists now just to harvest SUP units, then
+    // re-use the same pools when building the service sections below.
+    const _allServiceUnits = [
+      ...(S.selected.has('hwp')     ? buildHWPPool(c)   : []),
+      ...(S.selected.has('trf')     ? buildTRFPool()     : []),
+      ...(S.selected.has('ciu')     ? buildCIUPool(c)    : []),
+      ...(S.selected.has('port')    ? buildPORTPool()    : []),
+      ...(S.selected.has('rru')     ? buildRRUPool(c)    : []),
+      ...(S.selected.has('fviu')    ? [
+        { cs: c + '480', desc: 'FVIU Sergeant',                  shifts: ['SUP'] },
+        { cs: c + '490', desc: 'FVIU Detective Senior Sergeant', shifts: ['SUP'] },
+      ] : []),
+      ...(S.selected.has('socit')   ? [
+        { cs: 'REG450', desc: 'SOCIT Sergeant',      shifts: ['SUP'] },
+        { cs: 'REG460', desc: 'SOCIT Senior Sergeant', shifts: ['SUP'] },
+      ] : []),
+      ...(S.selected.has('sar')     ? [{ cs: 'RES451', desc: 'SAR Sergeant',                  shifts: ['SUP'] }] : []),
+      ...(S.selected.has('sog')     ? [{ cs: 'SCY250', desc: 'SOG Sergeant',                  shifts: ['SUP'] }] : []),
+      ...(S.selected.has('cirt')    ? [{ cs: 'CIR250', desc: 'CIRT Sergeant',                 shifts: ['SUP'] }] : []),
+      ...(S.selected.has('polair')  ? [
+        { cs: 'AIR451', desc: 'Air Wing Sergeant',       shifts: ['SUP'] },
+        { cs: 'AIR452', desc: 'Air Wing Sergeant',       shifts: ['SUP'] },
+        { cs: 'AIR46',  desc: 'Air Wing Senior Sergeant', shifts: ['SUP'] },
+      ] : []),
+      ...(S.selected.has('hviu')    ? [{ cs: 'ROA550', desc: 'Heavy Vehicle Supervisor',      shifts: ['SUP'] }] : []),
+      ...(S.selected.has('mounted') ? [{ cs: 'MOU850', desc: 'Mounted Sergeant',              shifts: ['SUP'] }] : []),
+    ];
 
+    const serviceSups = _allServiceUnits.filter(u => u.shifts.includes('SUP'));
+    supUnits = supUnits.concat(serviceSups);
 
-    sections.push({ id: '_sup', icon: '⭐', name: 'Command & Supervision', units: supUnits, pool: null, note: supNote });
+    if (supUnits.length > 0) {
+      if (serviceSups.length > 0 && supNote) supNote += ' Supervisors from selected specialist services are listed below.';
+      else if (serviceSups.length > 0)       supNote = 'Supervisors from selected specialist services.';
+      sections.push({ id: '_sup', icon: '⭐', name: 'Command & Supervision', units: supUnits, pool: null, note: supNote });
+    }
   }
 
   // ── Scalable services ──────────────────────────────────────────────────────
@@ -381,12 +419,12 @@ function buildOutput() {
     {
       id: 'hwp', icon: '🚔', name: 'Highway Patrol',
       pool: buildHWPPool(c),
-      note: `Local Highway Patrol uses the station code prefix. Solo motorcycles 600–609, marked cars 610–629, Q Cars 630–639 (1 per 3 marked). SGT 650–659 and S/SGT 660–669 appear at mid counts. Complaints 640–649 and Special Duties 670–699 at higher counts. Solo units appear below if selected.`,
+      note: `Local Highway Patrol uses the station code prefix. Marked cars 610–629, Q Cars 630–639 (1 per 3 marked). Special Duties 670–699 at higher counts. SGT/S/SGT (650–669) shown in Command & Supervision.`,
     },
     {
       id: 'trf', icon: '🚓', name: 'State Highway Patrol',
       pool: buildTRFPool(),
-      note: `State Highway Patrol uses the <strong>TRF</strong> prefix. Solo motorcycles TRF600–609, marked cars TRF610–629, Q Cars TRF630–639, SGT TRF650–659, S/SGT TRF660–669, Complaints TRF640–649, Special Duties TRF670–699. Solo units appear below if selected.`,
+      note: `State Highway Patrol uses the <strong>TRF</strong> prefix. Marked cars TRF610–629, Q Cars TRF630–639, Special Duties TRF670–699 at higher counts. SGT/S/SGT (TRF650–669) shown in Command & Supervision.`,
     },
     {
       id: 'ciu', outputName: 'CIU (Criminal Investigation Unit)', icon: '🔍', name: 'CIU', pool: buildCIUPool(c),
@@ -407,30 +445,38 @@ function buildOutput() {
     if (!S.selected.has(def.id)) return;
     const count = OVERRIDES[def.id] || defaultCount(def.id);
 
-    // Filter out fixed base station units — not needed in MissionChief output
-    let pool = def.pool.filter(u => !u.shifts.includes('FIXED'));
-
-    // Merge solo motorcycle units directly into the parent HWP/TRF section
-    if (def.id === 'hwp' && S.selected.has('hwp_solo')) {
-      pool = pool.concat(buildHWPSoloUnits(c));
-    }
-    if (def.id === 'trf' && S.selected.has('trf_solo')) {
-      pool = pool.concat(buildTRFSoloUnits());
-    }
+    // Filter out FIXED base stations and SUP supervisor units — both handled elsewhere
+    const pool = def.pool.filter(u => !u.shifts.includes('FIXED') && !u.shifts.includes('SUP'));
 
     sections.push({ ...def, units: pool, activeCount: count, scalable: true });
+
+    // Solo section — pushed immediately after the parent so it sits below it in output
+    if (def.id === 'hwp' && S.selected.has('hwp_solo')) {
+      sections.push({
+        id: 'hwp_solo', icon: '🏍️', name: 'Highway Patrol Solo', pool: null,
+        units: buildHWPSoloUnits(c),
+        note: 'Station-based HWP solo motorcycle units use the station code prefix, range 600–609.',
+      });
+    }
+    if (def.id === 'trf' && S.selected.has('trf_solo')) {
+      sections.push({
+        id: 'trf_solo', icon: '🏍️', name: 'State Highway Patrol Solo', pool: null,
+        units: buildTRFSoloUnits(),
+        note: 'State Highway Patrol solo motorcycle units use the <strong>TRF</strong> prefix, range 600–609.',
+      });
+    }
   });
 
   // ── Fixed-size services ────────────────────────────────────────────────────
   if (S.selected.has('fviu')) sections.push({
     id: 'fviu', outputName: 'FVIU (Family Violence Investigation Unit)', icon: '🏠', name: 'FVIU', pool: null,
     units: [
-      { cs: c + '480', desc: 'FVIU Sergeant',                  shifts: ['MS', 'AS'] },
+      { cs: c + '480', desc: 'FVIU Sergeant',                  shifts: ['SUP'] },
       { cs: c + '487', desc: 'FVIU Unit — Morning shift',      shifts: ['MS'] },
       { cs: c + '483', desc: 'FVIU Unit — Afternoon shift',    shifts: ['AS'] },
       { cs: c + '481', desc: 'FVIU Unit — Additional',         shifts: ['MS', 'AS'] },
       { cs: c + '482', desc: 'FVIU Unit — Additional',         shifts: ['MS', 'AS'] },
-      { cs: c + '490', desc: 'FVIU Detective Senior Sergeant', shifts: ['MS', 'AS'] },
+      { cs: c + '490', desc: 'FVIU Detective Senior Sergeant', shifts: ['SUP'] },
       { cs: c + '499', desc: 'FVIU Court Liaison Officer',     shifts: ['MS', 'AS'] },
     ],
     note: 'Secondary response to family violence incidents within the PSA. Day/afternoon shifts only — no dedicated night unit. SGT at 480, units 481–489 (MS anchor: 487, AS anchor: 483), DET/S/SGT at 490, Court Liaison at 499.',
@@ -442,8 +488,8 @@ function buildOutput() {
       { cs: 'REG477', desc: 'SOCIT Unit — Morning shift',   shifts: ['MS'] },
       { cs: 'REG473', desc: 'SOCIT Unit — Afternoon shift', shifts: ['AS'] },
       { cs: 'REG471', desc: 'SOCIT Unit — Night shift',     shifts: ['NS'] },
-      { cs: 'REG450', desc: 'SOCIT Sergeant',               shifts: ['MS', 'AS'] },
-      { cs: 'REG460', desc: 'SOCIT Senior Sergeant',        shifts: ['MS', 'AS'] },
+      { cs: 'REG450', desc: 'SOCIT Sergeant',               shifts: ['SUP'] },
+      { cs: 'REG460', desc: 'SOCIT Senior Sergeant',        shifts: ['SUP'] },
     ],
     note: 'SOCIT provides initial response to sexual/physical assaults on children or families. REG prefix. General units 470–499 (MS: REG477, AS: REG473, NS: REG471), SGT 450–459, S/SGT 460–469.',
   });
@@ -465,7 +511,7 @@ function buildOutput() {
     units: [
       { cs: 'RES400', desc: 'SAR Unit — General',  shifts: ['MS', 'AS'] },
       { cs: 'RES410', desc: 'SAR Field Team',       shifts: ['MS', 'AS', 'NS'] },
-      { cs: 'RES451', desc: 'SAR Sergeant',         shifts: ['MS', 'AS'] },
+      { cs: 'RES451', desc: 'SAR Sergeant',         shifts: ['SUP'] },
     ],
     note: 'RES prefix, range 400–459. Responds to missing persons, bushland searches and maritime incidents. Often activated on callout.',
   });
@@ -475,7 +521,7 @@ function buildOutput() {
     units: [
       { cs: 'SCY200', desc: 'Special Operations Group Unit',            shifts: ['MS', 'AS', 'NS'] },
       { cs: 'SCY210', desc: 'Special Operations Group Unit',            shifts: ['MS', 'AS', 'NS'] },
-      { cs: 'SCY250', desc: 'SOG Sergeant',                            shifts: ['MS', 'AS'] },
+      { cs: 'SCY250', desc: 'SOG Sergeant',                            shifts: ['SUP'] },
     ],
     note: 'SOG uses the SCY prefix. State-wide specialist tactical resource — deployed as required, not station-specific.',
   });
@@ -485,7 +531,7 @@ function buildOutput() {
     units: [
       { cs: 'CIR200', desc: 'CIRT Unit', shifts: ['MS', 'AS', 'NS'] },
       { cs: 'CIR210', desc: 'CIRT Unit', shifts: ['MS', 'AS', 'NS'] },
-      { cs: 'CIR250', desc: 'CIRT Sergeant', shifts: ['MS', 'AS'] },
+      { cs: 'CIR250', desc: 'CIRT Sergeant', shifts: ['SUP'] },
     ],
     note: 'CIRT uses the CIR prefix, range 200–899. Deployed for critical incidents requiring specialist negotiation and response capability. Region-wide asset.',
   });
@@ -497,9 +543,9 @@ function buildOutput() {
       { cs: 'POLAIR31', desc: 'Rotary Wing (Helicopter) — Secondary', shifts: ['AS', 'NS'] },
       { cs: 'POLAIR32', desc: 'Rotary Wing (Helicopter) — Tertiary',  shifts: ['NS'] },
       { cs: 'POLAIR35', desc: 'Fixed Wing (Plane)',                    shifts: ['MS', 'AS'] },
-      { cs: 'AIR451',   desc: 'Air Wing Sergeant',                    shifts: ['MS', 'AS'] },
-      { cs: 'AIR452',   desc: 'Air Wing Sergeant',                    shifts: ['NS'] },
-      { cs: 'AIR46',    desc: 'Air Wing Senior Sergeant',             shifts: ['MS'] },
+      { cs: 'AIR451',   desc: 'Air Wing Sergeant',                    shifts: ['SUP'] },
+      { cs: 'AIR452',   desc: 'Air Wing Sergeant',                    shifts: ['SUP'] },
+      { cs: 'AIR46',    desc: 'Air Wing Senior Sergeant',             shifts: ['SUP'] },
     ],
     note: 'POLAIR30–32 (rotary wing), POLAIR35 (fixed wing). Used for patrol, traffic enforcement, search/rescue, fire observation and urgent transport. SGT: AIR451/AIR452. S/SGT: AIR46. State-wide asset.',
   });
@@ -510,7 +556,7 @@ function buildOutput() {
       { cs: 'ROA501', desc: 'Heavy Vehicle Unit',              shifts: ['MS', 'AS'] },
       { cs: 'ROA502', desc: 'Heavy Vehicle Unit',              shifts: ['MS', 'AS'] },
       { cs: 'ROA503', desc: 'Heavy Vehicle Unit',              shifts: ['AS'] },
-      { cs: 'ROA550', desc: 'Heavy Vehicle Supervisor',        shifts: ['MS'] },
+      { cs: 'ROA550', desc: 'Heavy Vehicle Supervisor',        shifts: ['SUP'] },
       { cs: 'ROA560', desc: 'Heavy Vehicle Specialist Unit',   shifts: ['MS', 'AS'] },
     ],
     note: 'ROA prefix. Patrol units 501–505, supervisor at 550, specialist at 560. Compliance and enforcement targeting heavy vehicles on Victorian roads.',
@@ -521,7 +567,7 @@ function buildOutput() {
     units: [
       { cs: 'MOU800', desc: 'Mounted Unit — Primary',   shifts: ['MS', 'AS'] },
       { cs: 'MOU810', desc: 'Mounted Unit — Secondary', shifts: ['AS'] },
-      { cs: 'MOU850', desc: 'Mounted Sergeant',         shifts: ['MS', 'AS'] },
+      { cs: 'MOU850', desc: 'Mounted Sergeant',         shifts: ['SUP'] },
     ],
     note: 'MOU prefix, range 800–899. High-visibility patrol and crowd control. State-wide asset.',
   });
@@ -587,8 +633,8 @@ function renderOutput(code, role, roleLabel, sections) {
   let blocksHtml = '';
   sections.forEach(sec => {
     const isScalable = !!sec.scalable;
-    // Strip any remaining FIXED base station units from fixed-size sections
-    const displayUnits = sec.units.filter(u => !u.shifts.includes('FIXED'));
+    // Strip FIXED base station units and SUP supervisor units from section display
+    const displayUnits = sec.units.filter(u => !u.shifts.includes('FIXED') && !u.shifts.includes('SUP'));
     const count      = isScalable ? (OVERRIDES[sec.id] || defaultCount(sec.id)) : displayUnits.length;
     const maxCount   = isScalable ? (MAX_UNITS[sec.id] || displayUnits.length) : displayUnits.length;
 
@@ -698,7 +744,7 @@ function buildExportText(code, role, roleLabel, sections) {
   exp += `Role     : ${roleLabel}\nUnits    : ${sections.reduce((a, s) => { const du = s.units.filter(u => !u.shifts.includes('FIXED')); return a + (s.scalable ? (OVERRIDES[s.id] || defaultCount(s.id)) : du.length); }, 0)}\n${'─'.repeat(46)}\n\n`;
 
   sections.forEach(sec => {
-    const exportUnits = sec.units.filter(u => !u.shifts.includes('FIXED'));
+    const exportUnits = sec.units.filter(u => !u.shifts.includes('FIXED') && !u.shifts.includes('SUP'));
     const count = sec.scalable ? (OVERRIDES[sec.id] || defaultCount(sec.id)) : exportUnits.length;
     exp += `${(sec.outputName || sec.name).toUpperCase()}\n`;
     exportUnits.slice(0, count).forEach(u => { exp += `  ${u.cs.padEnd(12)} ${u.desc}\n`; });
