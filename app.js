@@ -329,9 +329,23 @@ function buildOutput() {
   }[role] || 'Metropolitan (24 Hours)';
   const sections  = [];
 
+  // ── Build all scalable pools once ─────────────────────────────────────────
+  // Pools are built here so the same shuffled callsigns are used both when
+  // harvesting SUP units for Command & Supervision and when rendering the
+  // service sections. Building twice would produce different random callsigns.
+  const POOLS = {
+    cars:  buildCarPool(c),
+    vans:  buildVanPool(c),
+    hwp:   buildHWPPool(c),
+    trf:   buildTRFPool(),
+    ciu:   buildCIUPool(c),
+    port:  buildPORTPool(),
+    rru:   buildRRUPool(c),
+  };
+
   // ── Supervision ────────────────────────────────────────────────────────────
-  // Builds the base station supervisor units, then collects SUP-tagged units
-  // from every selected service and appends them here too.
+  // Base station supervisors first, then SUP-tagged units from every selected
+  // service (harvested from the already-built pools and fixed service lists).
   {
     const is24hr         = (role === 'metro_24' || role === 'regional_24');
     const isLarge        = (role === 'metro_24' || role === 'regional_24');
@@ -366,37 +380,31 @@ function buildOutput() {
       }
     }
 
-    // Collect supervisor units from all selected services and append them
-    // (SUP-tagged units are defined in each service's pool/unit list)
-    // We build all service unit lists now just to harvest SUP units, then
-    // re-use the same pools when building the service sections below.
-    const _allServiceUnits = [
-      ...(S.selected.has('hwp')     ? buildHWPPool(c)   : []),
-      ...(S.selected.has('trf')     ? buildTRFPool()     : []),
-      ...(S.selected.has('ciu')     ? buildCIUPool(c)    : []),
-      ...(S.selected.has('port')    ? buildPORTPool()    : []),
-      ...(S.selected.has('rru')     ? buildRRUPool(c)    : []),
+    // Harvest SUP units from the already-built pools (scalable services)
+    // and from the inline fixed-service unit lists.
+    const serviceSupSources = [
+      ...Object.entries(POOLS).filter(([id]) => S.selected.has(id)).flatMap(([, pool]) => pool),
       ...(S.selected.has('fviu')    ? [
         { cs: c + '480', desc: 'FVIU Sergeant',                  shifts: ['SUP'] },
         { cs: c + '490', desc: 'FVIU Detective Senior Sergeant', shifts: ['SUP'] },
       ] : []),
       ...(S.selected.has('socit')   ? [
-        { cs: 'REG450', desc: 'SOCIT Sergeant',      shifts: ['SUP'] },
+        { cs: 'REG450', desc: 'SOCIT Sergeant',        shifts: ['SUP'] },
         { cs: 'REG460', desc: 'SOCIT Senior Sergeant', shifts: ['SUP'] },
       ] : []),
-      ...(S.selected.has('sar')     ? [{ cs: 'RES451', desc: 'SAR Sergeant',                  shifts: ['SUP'] }] : []),
-      ...(S.selected.has('sog')     ? [{ cs: 'SCY250', desc: 'SOG Sergeant',                  shifts: ['SUP'] }] : []),
-      ...(S.selected.has('cirt')    ? [{ cs: 'CIR250', desc: 'CIRT Sergeant',                 shifts: ['SUP'] }] : []),
+      ...(S.selected.has('sar')     ? [{ cs: 'RES451', desc: 'SAR Sergeant',                   shifts: ['SUP'] }] : []),
+      ...(S.selected.has('sog')     ? [{ cs: 'SCY250', desc: 'SOG Sergeant',                   shifts: ['SUP'] }] : []),
+      ...(S.selected.has('cirt')    ? [{ cs: 'CIR250', desc: 'CIRT Sergeant',                  shifts: ['SUP'] }] : []),
       ...(S.selected.has('polair')  ? [
-        { cs: 'AIR451', desc: 'Air Wing Sergeant',       shifts: ['SUP'] },
-        { cs: 'AIR452', desc: 'Air Wing Sergeant',       shifts: ['SUP'] },
+        { cs: 'AIR451', desc: 'Air Wing Sergeant',        shifts: ['SUP'] },
+        { cs: 'AIR452', desc: 'Air Wing Sergeant',        shifts: ['SUP'] },
         { cs: 'AIR46',  desc: 'Air Wing Senior Sergeant', shifts: ['SUP'] },
       ] : []),
-      ...(S.selected.has('hviu')    ? [{ cs: 'ROA550', desc: 'Heavy Vehicle Supervisor',      shifts: ['SUP'] }] : []),
-      ...(S.selected.has('mounted') ? [{ cs: 'MOU850', desc: 'Mounted Sergeant',              shifts: ['SUP'] }] : []),
+      ...(S.selected.has('hviu')    ? [{ cs: 'ROA550', desc: 'Heavy Vehicle Supervisor',       shifts: ['SUP'] }] : []),
+      ...(S.selected.has('mounted') ? [{ cs: 'MOU850', desc: 'Mounted Sergeant',               shifts: ['SUP'] }] : []),
     ];
 
-    const serviceSups = _allServiceUnits.filter(u => u.shifts.includes('SUP'));
+    const serviceSups = serviceSupSources.filter(u => u.shifts.includes('SUP'));
     supUnits = supUnits.concat(serviceSups);
 
     if (supUnits.length > 0) {
@@ -409,34 +417,31 @@ function buildOutput() {
   // ── Scalable services ──────────────────────────────────────────────────────
   const svcDefs = [
     {
-      id: 'cars', icon: '🚗', name: 'Station Cars', pool: buildCarPool(c),
+      id: 'cars', icon: '🚗', name: 'Station Cars',
       note: `Sedans use 200–299. Trailing digit reflects shift start: ${c}20<strong>7</strong>=0700, ${c}20<strong>3</strong>=1500, ${c}21<strong>1</strong>=2300. Additional units increment from those bases.`,
     },
     {
-      id: 'vans', icon: '🚐', name: 'Divisional Vans', pool: buildVanPool(c),
+      id: 'vans', icon: '🚐', name: 'Divisional Vans',
       note: `Vans use 300–399. Shift convention mirrors cars: 30<strong>7</strong>=morning, 30<strong>3</strong>=afternoon, 31<strong>1</strong>=night. Typically crewed by 2 officers and carry a prisoner cage.`,
     },
     {
       id: 'hwp', icon: '🚔', name: 'Highway Patrol',
-      pool: buildHWPPool(c),
       note: `Local Highway Patrol uses the station code prefix. Marked cars 610–629, Q Cars 630–639 (1 per 3 marked). Special Duties 670–699 at higher counts. SGT/S/SGT (650–669) shown in Command & Supervision.`,
     },
     {
       id: 'trf', icon: '🚓', name: 'State Highway Patrol',
-      pool: buildTRFPool(),
       note: `State Highway Patrol uses the <strong>TRF</strong> prefix. Marked cars TRF610–629, Q Cars TRF630–639, Special Duties TRF670–699 at higher counts. SGT/S/SGT (TRF650–669) shown in Command & Supervision.`,
     },
     {
-      id: 'ciu', outputName: 'CIU (Criminal Investigation Unit)', icon: '🔍', name: 'CIU', pool: buildCIUPool(c),
+      id: 'ciu', outputName: 'CIU (Criminal Investigation Unit)', icon: '🔍', name: 'CIU',
       note: `CIU investigates serious crime. Morning: ${c}507. Afternoon: ${c}503 / ${c}520. Night: ${c}541–546 with night supervisor at ${c}550.`,
     },
     {
-      id: 'port', outputName: 'PORT (Public Order Response Team)', icon: '🛡️', name: 'PORT', pool: buildPORTPool(),
-      note: `PORT (Public Order Response Team) uses the <strong>POR</strong> prefix — not the station code. General units 600–649, SGT 650–659, S/SGT 660–669. Region-wide asset, not station-specific.`,
+      id: 'port', outputName: 'PORT (Public Order Response Team)', icon: '🛡️', name: 'PORT',
+      note: `PORT (Public Order Response Team) uses the <strong>POR</strong> prefix — not the station code. General units 600–649, SGT/S/SGT shown in Command & Supervision. Region-wide asset, not station-specific.`,
     },
-
     {
-      id: 'rru', outputName: 'RRU (Regional Response Unit)', icon: '⚡', name: 'RRU', pool: buildRRUPool(c),
+      id: 'rru', outputName: 'RRU (Regional Response Unit)', icon: '⚡', name: 'RRU',
       note: `RRU (440–449) provides operational support, allocated to specific operations or tasks.`,
     },
   ];
@@ -445,23 +450,27 @@ function buildOutput() {
     if (!S.selected.has(def.id)) return;
     const count = OVERRIDES[def.id] || defaultCount(def.id);
 
-    // Filter out FIXED base stations and SUP supervisor units — both handled elsewhere
-    const pool = def.pool.filter(u => !u.shifts.includes('FIXED') && !u.shifts.includes('SUP'));
+    // Use the pre-built pool; filter out FIXED and SUP units — both handled elsewhere
+    const pool = POOLS[def.id].filter(u => !u.shifts.includes('FIXED') && !u.shifts.includes('SUP'));
 
     sections.push({ ...def, units: pool, activeCount: count, scalable: true });
 
-    // Solo section — pushed immediately after the parent so it sits below it in output
+    // Solo section — pushed immediately after the parent, scalable with its own slider
     if (def.id === 'hwp' && S.selected.has('hwp_solo')) {
+      const soloPool = buildHWPSoloUnits(c);
       sections.push({
-        id: 'hwp_solo', icon: '🏍️', name: 'Highway Patrol Solo', pool: null,
-        units: buildHWPSoloUnits(c),
+        id: 'hwp_solo', icon: '🏍️', name: 'Highway Patrol Solo',
+        units: soloPool, activeCount: OVERRIDES['hwp_solo'] || defaultCount('hwp_solo'),
+        scalable: true,
         note: 'Station-based HWP solo motorcycle units use the station code prefix, range 600–609.',
       });
     }
     if (def.id === 'trf' && S.selected.has('trf_solo')) {
+      const soloPool = buildTRFSoloUnits();
       sections.push({
-        id: 'trf_solo', icon: '🏍️', name: 'State Highway Patrol Solo', pool: null,
-        units: buildTRFSoloUnits(),
+        id: 'trf_solo', icon: '🏍️', name: 'State Highway Patrol Solo',
+        units: soloPool, activeCount: OVERRIDES['trf_solo'] || defaultCount('trf_solo'),
+        scalable: true,
         note: 'State Highway Patrol solo motorcycle units use the <strong>TRF</strong> prefix, range 600–609.',
       });
     }
