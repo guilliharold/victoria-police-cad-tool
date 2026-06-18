@@ -384,7 +384,7 @@ function buildOutput() {
     },
     {
       id: 'ciu', outputName: 'CIU (Criminal Investigation Unit)', icon: '🔍', name: 'CIU', pool: buildCIUPool(c),
-      note: `CIU investigates serious crime. Morning: ${c}507. Afternoon: ${c}503/${c}520. Night: ${c}541–546 with supervisor at ${c}550. Fixed base at ${c}905.`,
+      note: `CIU investigates serious crime. Morning: ${c}507. Afternoon: ${c}503 / ${c}520. Night: ${c}541–546 with night supervisor at ${c}550. Fixed base at ${c}905.`,
     },
     {
       id: 'port', outputName: 'PORT (Public Order Response Team)', icon: '🛡️', name: 'PORT', pool: buildPORTPool(),
@@ -421,14 +421,15 @@ function buildOutput() {
   if (S.selected.has('fviu')) sections.push({
     id: 'fviu', outputName: 'FVIU (Family Violence Investigation Unit)', icon: '🏠', name: 'FVIU', pool: null,
     units: [
-      { cs: c + '480', desc: 'FVIU Sergeant',                 shifts: ['MS', 'AS'] },
-      { cs: c + '487', desc: 'FVIU Unit — Morning shift',     shifts: ['MS'] },
-      { cs: c + '483', desc: 'FVIU Unit — Afternoon shift',   shifts: ['AS'] },
-      { cs: c + '481', desc: 'FVIU Unit — Additional',        shifts: ['MS', 'AS'] },
-      { cs: c + '490', desc: 'FVIU Detective Senior Sergeant',shifts: ['MS', 'AS'] },
-      { cs: c + '499', desc: 'FVIU Court Liaison Officer',    shifts: ['MS', 'AS'] },
+      { cs: c + '480', desc: 'FVIU Sergeant',                  shifts: ['MS', 'AS'] },
+      { cs: c + '487', desc: 'FVIU Unit — Morning shift',      shifts: ['MS'] },
+      { cs: c + '483', desc: 'FVIU Unit — Afternoon shift',    shifts: ['AS'] },
+      { cs: c + '481', desc: 'FVIU Unit — Additional',         shifts: ['MS', 'AS'] },
+      { cs: c + '482', desc: 'FVIU Unit — Additional',         shifts: ['MS', 'AS'] },
+      { cs: c + '490', desc: 'FVIU Detective Senior Sergeant', shifts: ['MS', 'AS'] },
+      { cs: c + '499', desc: 'FVIU Court Liaison Officer',     shifts: ['MS', 'AS'] },
     ],
-    note: 'Secondary response to family violence incidents within the PSA. Day/afternoon shifts only — no dedicated night unit. SGT at 480, S/SGT at 490, units 481–489, Court Liaison at 499.',
+    note: 'Secondary response to family violence incidents within the PSA. Day/afternoon shifts only — no dedicated night unit. SGT at 480, units 481–489 (MS anchor: 487, AS anchor: 483), DET/S/SGT at 490, Court Liaison at 499.',
   });
 
   if (S.selected.has('socit')) sections.push({
@@ -440,18 +441,19 @@ function buildOutput() {
       { cs: 'REG450', desc: 'SOCIT Sergeant',               shifts: ['MS', 'AS'] },
       { cs: 'REG460', desc: 'SOCIT Senior Sergeant',        shifts: ['MS', 'AS'] },
     ],
-    note: 'SOCIT provides initial response to sexual/physical assaults on children or families. Regional (REG) prefix. Units 470–499, SGT 450–459, S/SGT 460–469.',
+    note: 'SOCIT provides initial response to sexual/physical assaults on children or families. REG prefix. General units 470–499 (MS: REG477, AS: REG473, NS: REG471), SGT 450–459, S/SGT 460–469.',
   });
 
   if (S.selected.has('dog')) sections.push({
     id: 'dog', outputName: 'CAN (Dog Squad)', icon: '🐕', name: 'Dog Squad (CAN)', pool: null,
     units: [
-      { cs: 'CAN207', desc: 'Canine Unit — Morning shift',           shifts: ['MS'] },
-      { cs: 'CAN203', desc: 'Canine Unit — Afternoon shift',         shifts: ['AS'] },
-      { cs: 'CAN211', desc: 'Canine Unit — Night shift',             shifts: ['NS'] },
-      { cs: 'CAN700', desc: 'Canine — Narcotics / Training specialty', shifts: ['MS', 'AS'] },
+      { cs: 'CAN207', desc: 'Canine Unit — Morning shift',              shifts: ['MS'] },
+      { cs: 'CAN203', desc: 'Canine Unit — Afternoon shift',            shifts: ['AS'] },
+      { cs: 'CAN211', desc: 'Canine Unit — Night shift',                shifts: ['NS'] },
+      { cs: 'CAN700', desc: 'Canine — Narcotics / Training specialty',  shifts: ['MS', 'AS'] },
+      { cs: 'CAN710', desc: 'Canine — Court security specialty (SFK)',  shifts: ['MS', 'AS'] },
     ],
-    note: 'CAN prefix regardless of station. Numbers follow standard shift convention. CAN700 = narcotics/training specialty.',
+    note: 'CAN prefix regardless of station. Standard shift convention: CAN207 (MS), CAN203 (AS), CAN211 (NS). CAN700 = narcotics/training specialty. CAN710–714 = court security (SFK courts).',
   });
 
   if (S.selected.has('sar')) sections.push({
@@ -489,21 +491,25 @@ function buildOutput() {
     units: [
       { cs: 'POLAIR30', desc: 'Rotary Wing (Helicopter) — Primary',   shifts: ['MS', 'AS', 'NS'] },
       { cs: 'POLAIR31', desc: 'Rotary Wing (Helicopter) — Secondary', shifts: ['AS', 'NS'] },
+      { cs: 'POLAIR32', desc: 'Rotary Wing (Helicopter) — Tertiary',  shifts: ['NS'] },
       { cs: 'POLAIR35', desc: 'Fixed Wing (Plane)',                    shifts: ['MS', 'AS'] },
-      { cs: 'AIR451',   desc: 'Air Sergeant',                         shifts: ['MS', 'AS'] },
-      { cs: 'AIR46',    desc: 'Air Senior Sergeant',                   shifts: ['MS'] },
+      { cs: 'AIR451',   desc: 'Air Wing Sergeant',                    shifts: ['MS', 'AS'] },
+      { cs: 'AIR452',   desc: 'Air Wing Sergeant',                    shifts: ['NS'] },
+      { cs: 'AIR46',    desc: 'Air Wing Senior Sergeant',             shifts: ['MS'] },
     ],
-    note: 'POLAIR30–32 (rotary), POLAIR35 (fixed wing). Used for patrol, traffic, search/rescue, fire observation and urgent transport. State-wide asset.',
+    note: 'POLAIR30–32 (rotary wing), POLAIR35 (fixed wing). Used for patrol, traffic enforcement, search/rescue, fire observation and urgent transport. SGT: AIR451/AIR452. S/SGT: AIR46. State-wide asset.',
   });
 
   if (S.selected.has('hviu')) sections.push({
     id: 'hviu', outputName: 'ROA (Heavy Vehicle Unit)', icon: '🚛', name: 'Heavy Vehicle Unit (ROA)', pool: null,
     units: [
-      { cs: 'ROA501', desc: 'Heavy Vehicle Unit',       shifts: ['MS', 'AS'] },
-      { cs: 'ROA503', desc: 'Heavy Vehicle Unit',       shifts: ['AS'] },
-      { cs: 'ROA550', desc: 'Heavy Vehicle Supervisor', shifts: ['MS'] },
+      { cs: 'ROA501', desc: 'Heavy Vehicle Unit',              shifts: ['MS', 'AS'] },
+      { cs: 'ROA502', desc: 'Heavy Vehicle Unit',              shifts: ['MS', 'AS'] },
+      { cs: 'ROA503', desc: 'Heavy Vehicle Unit',              shifts: ['AS'] },
+      { cs: 'ROA550', desc: 'Heavy Vehicle Supervisor',        shifts: ['MS'] },
+      { cs: 'ROA560', desc: 'Heavy Vehicle Specialist Unit',   shifts: ['MS', 'AS'] },
     ],
-    note: 'ROA prefix, range 501–505. Compliance and enforcement targeting heavy vehicles.',
+    note: 'ROA prefix. Patrol units 501–505, supervisor at 550, specialist at 560. Compliance and enforcement targeting heavy vehicles on Victorian roads.',
   });
 
   if (S.selected.has('mounted')) sections.push({
