@@ -229,6 +229,10 @@ function goStep2() {
   S.regionLabel   = r ? REGION_DATA[r].label : '';
   S.divisionLabel = document.getElementById('selDiv').value || '';
 
+  // Clear any selections and slider overrides from a previous session
+  S.selected.clear();
+  Object.keys(OVERRIDES).forEach(k => delete OVERRIDES[k]);
+
   buildServiceGrid();
   go(2);
 }
