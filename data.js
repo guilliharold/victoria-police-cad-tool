@@ -120,7 +120,7 @@ const DEFAULTS = {
 
 // Maximum units each scalable service pool can produce.
 // Should match the pool sizes in the builders below.
-const MAX_UNITS = { cars: 15, vans: 6, hwp: 24, trf: 24, ciu: 11, rru: 5 };
+const MAX_UNITS = { cars: 15, vans: 6, hwp: 22, trf: 22, ciu: 11, rru: 5 };
 
 
 // =============================================================================
@@ -175,29 +175,28 @@ function buildVanPool(c) {
   return interleave(ms, as, ns);
 }
 
-// buildHWPPool — patrol cars, Q cars, complaints, special duties, SGT/S/SGT.
+// buildHWPPool — patrol cars, Q cars, special duties, SGT/S/SGT.
 // Pattern: MS, AS, NS, Q repeating (1 Q per 3 marked).
-// Supervisors, complaints and special duties appear at progressively higher counts.
+// SGT/S/SGT tagged SUP so they are lifted into Command & Supervision.
+// Special duties appear at higher counts.
 function buildHWPPool(c) {
   const ms  = shuffle([611, 612, 613, 614].map(n => ({ cs: c + n, desc: 'HWP Marked Car',          shifts: ['MS'] })));
   const as  = shuffle([616, 617, 618, 619].map(n => ({ cs: c + n, desc: 'HWP Marked Car',          shifts: ['AS'] })));
   const ns  = shuffle([621, 622, 623, 624].map(n => ({ cs: c + n, desc: 'HWP Marked Car',          shifts: ['NS'] })));
   const q   = shuffle([630, 631, 632, 633].map(n => ({ cs: c + n, desc: 'HWP Q Car (unmarked)',    shifts: ['MS', 'AS'] })));
-  const cmp = shuffle([640, 641, 642, 643].map(n => ({ cs: c + n, desc: 'HWP Complaints',          shifts: ['MS', 'AS'] })));
   const spd = shuffle([670, 671, 672, 673, 674, 675].map(n => ({ cs: c + n, desc: 'HWP Special Duties', shifts: ['MS', 'AS'] })));
   const sgt = [
-    { cs: c + shuffle([650, 651, 652, 653])[0], desc: 'HWP Sergeant',        shifts: ['MS', 'AS'] },
-    { cs: c + shuffle([654, 655, 656, 657])[0], desc: 'HWP Sergeant',        shifts: ['NS'] },
-    { cs: c + shuffle([660, 661, 662, 663])[0], desc: 'HWP Senior Sergeant', shifts: ['MS'] },
+    { cs: c + shuffle([650, 651, 652, 653])[0], desc: 'HWP Sergeant',        shifts: ['SUP'] },
+    { cs: c + shuffle([654, 655, 656, 657])[0], desc: 'HWP Sergeant',        shifts: ['SUP'] },
+    { cs: c + shuffle([660, 661, 662, 663])[0], desc: 'HWP Senior Sergeant', shifts: ['SUP'] },
   ];
   return [
     ms[0], as[0], ns[0], q[0],   //  1–4  : core patrol
     ms[1], as[1], ns[1], q[1],   //  5–8
     ms[2], as[2], ns[2], q[2],   //  9–12
     ms[3], as[3], ns[3], q[3],   // 13–16 : extended patrol
-    ...sgt,                       // 17–19 : supervisors
-    cmp[0], cmp[1],              // 20–21 : complaints
-    spd[0], spd[1],              // 22–23 : special duties
+    ...sgt,                       // 17–19 : supervisors (lifted to Command & Supervision)
+    spd[0], spd[1],              // 20–21 : special duties
     { cs: c + '906', desc: 'HWP Base Station (fixed)', shifts: ['FIXED'] },
   ];
 }
@@ -208,18 +207,18 @@ function buildHWPSoloUnits(c) {
 }
 
 // buildTRFPool — same structure as HWP but with TRF prefix.
-// Supervisors, complaints and special duties at higher slider counts.
+// SGT/S/SGT tagged SUP so they are lifted into Command & Supervision.
+// Special duties appear at higher counts.
 function buildTRFPool() {
   const ms  = shuffle([611, 612, 613, 614].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',          shifts: ['MS'] })));
   const as  = shuffle([616, 617, 618, 619].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',          shifts: ['AS'] })));
   const ns  = shuffle([621, 622, 623, 624].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',          shifts: ['NS'] })));
   const q   = shuffle([630, 631, 632, 633].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Q Car (unmarked)',    shifts: ['MS', 'AS'] })));
-  const cmp = shuffle([640, 641, 642, 643].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Complaints',          shifts: ['MS', 'AS'] })));
   const spd = shuffle([670, 671, 672, 673, 674, 675].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Special Duties', shifts: ['MS', 'AS'] })));
   const sgt = [
-    { cs: 'TRF' + shuffle([650, 651, 652, 653])[0], desc: 'State Highway Patrol — Sergeant',        shifts: ['MS', 'AS'] },
-    { cs: 'TRF' + shuffle([654, 655, 656, 657])[0], desc: 'State Highway Patrol — Sergeant',        shifts: ['NS'] },
-    { cs: 'TRF' + shuffle([660, 661, 662, 663])[0], desc: 'State Highway Patrol — Senior Sergeant', shifts: ['MS'] },
+    { cs: 'TRF' + shuffle([650, 651, 652, 653])[0], desc: 'State Highway Patrol — Sergeant',        shifts: ['SUP'] },
+    { cs: 'TRF' + shuffle([654, 655, 656, 657])[0], desc: 'State Highway Patrol — Sergeant',        shifts: ['SUP'] },
+    { cs: 'TRF' + shuffle([660, 661, 662, 663])[0], desc: 'State Highway Patrol — Senior Sergeant', shifts: ['SUP'] },
   ];
   return [
     ms[0], as[0], ns[0], q[0],
@@ -227,7 +226,6 @@ function buildTRFPool() {
     ms[2], as[2], ns[2], q[2],
     ms[3], as[3], ns[3], q[3],
     ...sgt,
-    cmp[0], cmp[1],
     spd[0], spd[1],
     { cs: 'TRF906', desc: 'State Highway Patrol Base (fixed)', shifts: ['FIXED'] },
   ];
