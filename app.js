@@ -389,8 +389,8 @@ function buildOutput() {
         { cs: c + '490', desc: 'FVIU Detective Senior Sergeant', shifts: ['SUP'] },
       ] : []),
       ...(S.selected.has('socit')   ? [
-        { cs: 'REG450', desc: 'SOCIT Sergeant',        shifts: ['SUP'] },
-        { cs: 'REG460', desc: 'SOCIT Senior Sergeant', shifts: ['SUP'] },
+        { cs: c + '450', desc: 'SOCIT Sergeant',        shifts: ['SUP'] },
+        { cs: c + '460', desc: 'SOCIT Senior Sergeant', shifts: ['SUP'] },
       ] : []),
       ...(S.selected.has('sar')     ? [{ cs: 'RES451', desc: 'SAR Sergeant',                   shifts: ['SUP'] }] : []),
       ...(S.selected.has('sog')     ? [{ cs: 'SCY250', desc: 'SOG Sergeant',                   shifts: ['SUP'] }] : []),
@@ -402,6 +402,10 @@ function buildOutput() {
       ] : []),
       ...(S.selected.has('hviu')    ? [{ cs: 'ROA550', desc: 'Heavy Vehicle Supervisor',       shifts: ['SUP'] }] : []),
       ...(S.selected.has('mounted') ? [{ cs: 'MOU850', desc: 'Mounted Sergeant',               shifts: ['SUP'] }] : []),
+      ...(S.selected.has('cri')     ? [
+        { cs: 'CRI571', desc: 'Crime Desk Sergeant', shifts: ['SUP'] },
+        { cs: 'CRI572', desc: 'Crime Desk Sergeant', shifts: ['SUP'] },
+      ] : []),
     ];
 
     const serviceSups = serviceSupSources.filter(u => u.shifts.includes('SUP'));
@@ -426,11 +430,11 @@ function buildOutput() {
     },
     {
       id: 'hwp', icon: '🚔', name: 'Highway Patrol',
-      note: `Local Highway Patrol uses the station code prefix. Marked cars 610–629, Q Cars 630–639 (1 per 3 marked). Special Duties 670–699 at higher counts. SGT/S/SGT (650–669) shown in Command & Supervision.`,
+      note: `Local Highway Patrol uses the station code prefix. Marked cars 610–629, Q Cars 630–639 (1 per ~4 marked). Special Duties 670–699 at higher counts. SGT (650–659) and S/SGT (660–669) shown in Command & Supervision.`,
     },
     {
       id: 'trf', icon: '🚓', name: 'State Highway Patrol',
-      note: `State Highway Patrol uses the <strong>TRF</strong> prefix. Marked cars TRF610–629, Q Cars TRF630–639, Special Duties TRF670–699 at higher counts. SGT/S/SGT (TRF650–669) shown in Command & Supervision.`,
+      note: `State Highway Patrol uses the <strong>TRF</strong> prefix. Marked cars TRF610–629, Q Cars TRF630–639, Special Duties TRF670–699 at higher counts. SGT (TRF650–659) and S/SGT (TRF660–669) shown in Command & Supervision. State-level unit — no dedicated base station callsign.`,
     },
     {
       id: 'ciu', outputName: 'CIU (Criminal Investigation Unit)', icon: '🔍', name: 'CIU',
@@ -494,25 +498,25 @@ function buildOutput() {
   if (S.selected.has('socit')) sections.push({
     id: 'socit', outputName: 'SOCIT (Sexual Offences & Child Investigations Team)', icon: '👶', name: 'SOCIT', pool: null,
     units: [
-      { cs: 'REG477', desc: 'SOCIT Unit — Morning shift',   shifts: ['MS'] },
-      { cs: 'REG473', desc: 'SOCIT Unit — Afternoon shift', shifts: ['AS'] },
-      { cs: 'REG471', desc: 'SOCIT Unit — Night shift',     shifts: ['NS'] },
-      { cs: 'REG450', desc: 'SOCIT Sergeant',               shifts: ['SUP'] },
-      { cs: 'REG460', desc: 'SOCIT Senior Sergeant',        shifts: ['SUP'] },
+      { cs: c + '477', desc: 'SOCIT Unit — Morning shift',   shifts: ['MS'] },
+      { cs: c + '473', desc: 'SOCIT Unit — Afternoon shift', shifts: ['AS'] },
+      { cs: c + '471', desc: 'SOCIT Unit — Night shift',     shifts: ['NS'] },
+      { cs: c + '450', desc: 'SOCIT Sergeant',               shifts: ['SUP'] },
+      { cs: c + '460', desc: 'SOCIT Senior Sergeant',        shifts: ['SUP'] },
     ],
-    note: 'SOCIT provides initial response to sexual/physical assaults on children or families. REG prefix. General units 470–499 (MS: REG477, AS: REG473, NS: REG471), SGT 450–459, S/SGT 460–469.',
+    note: 'SOCIT provides initial response to sexual/physical assaults on children or families. Uses station prefix. General units 470–499 (MS: 477, AS: 473, NS: 471), SGT 450–459, S/SGT 460–469.',
   });
 
   if (S.selected.has('dog')) sections.push({
     id: 'dog', outputName: 'CAN (Dog Squad)', icon: '🐕', name: 'Dog Squad (CAN)', pool: null,
     units: [
-      { cs: 'CAN207', desc: 'Canine Unit — Morning shift',              shifts: ['MS'] },
-      { cs: 'CAN203', desc: 'Canine Unit — Afternoon shift',            shifts: ['AS'] },
-      { cs: 'CAN211', desc: 'Canine Unit — Night shift',                shifts: ['NS'] },
-      { cs: 'CAN700', desc: 'Canine — Narcotics / Training specialty',  shifts: ['MS', 'AS'] },
-      { cs: 'CAN710', desc: 'Canine — Court security specialty (SFK)',  shifts: ['MS', 'AS'] },
+      { cs: 'CAN200', desc: 'Canine Unit — General duties',              shifts: ['MS', 'AS', 'NS'] },
+      { cs: 'CAN201', desc: 'Canine Unit — General duties',              shifts: ['MS', 'AS'] },
+      { cs: 'CAN700', desc: 'Canine — Narcotics / Training specialty',   shifts: ['MS', 'AS'] },
+      { cs: 'CAN710', desc: 'Canine — Court security specialty (SFK)',   shifts: ['MS', 'AS'] },
+      { cs: 'CAN711', desc: 'Canine — Court security specialty (SFK)',   shifts: ['MS', 'AS'] },
     ],
-    note: 'CAN prefix regardless of station. Standard shift convention: CAN207 (MS), CAN203 (AS), CAN211 (NS). CAN700 = narcotics/training specialty. CAN710–714 = court security (SFK courts).',
+    note: 'CAN prefix regardless of station. Range 200–799. CAN200–299 general duties. CAN700 = narcotics/training specialty. CAN710–714 = court security (SFK courts).',
   });
 
   if (S.selected.has('sar')) sections.push({
@@ -579,6 +583,19 @@ function buildOutput() {
       { cs: 'MOU850', desc: 'Mounted Sergeant',         shifts: ['SUP'] },
     ],
     note: 'MOU prefix, range 800–899. High-visibility patrol and crowd control. State-wide asset.',
+  });
+
+  if (S.selected.has('cri')) sections.push({
+    id: 'cri', outputName: 'CRI (Crime Desk)', icon: '📷', name: 'Crime Desk (CRI)', pool: null,
+    units: [
+      { cs: 'CRI577', desc: 'Crime Desk Unit — Morning shift',   shifts: ['MS'] },
+      { cs: 'CRI573', desc: 'Crime Desk Unit — Afternoon shift', shifts: ['AS'] },
+      { cs: 'CRI575', desc: 'Crime Desk Unit — Night shift',     shifts: ['NS'] },
+      { cs: 'CRI571', desc: 'Crime Desk Sergeant',               shifts: ['SUP'] },
+      { cs: 'CRI572', desc: 'Crime Desk Sergeant',               shifts: ['SUP'] },
+      { cs: 'CRI570', desc: 'Crime Desk Office (fixed)',         shifts: ['FIXED'] },
+    ],
+    note: 'CRI prefix. Coordinates CSOs attending events, scene photography and forensic examination. Units 573–579 (MS: CRI577, AS: CRI573, NS: CRI575). SGTs at CRI571–572. Office at CRI570. Region-wide asset, not station-specific.',
   });
 
   renderOutput(c, role, roleLabel, sections);
