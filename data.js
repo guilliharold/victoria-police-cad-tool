@@ -84,8 +84,8 @@ function parseStation(s) {
 const SERVICES = [
   { id: 'cars',    icon: '🚗', name: 'Station Cars',             desc: 'General duties sedans. 200–299.' },
   { id: 'vans',    icon: '🚐', name: 'Divisional Vans',          desc: 'Cage vans for prisoner transport. 300–399.' },
-  { id: 'hwp',     icon: '🚔', name: 'Highway Patrol',            desc: 'Local HWP — marked & unmarked cars. Station code, 610–669.' },
-  { id: 'trf',     icon: '🚓', name: 'State Highway Patrol',      desc: 'State HWP — marked & unmarked cars. TRF prefix, 610–669.' },
+  { id: 'hwp',     icon: '🚔', name: 'Highway Patrol',            desc: 'Local HWP — marked cars 610–629, Q cars 630–639.' },
+  { id: 'trf',     icon: '🚓', name: 'State Highway Patrol',      desc: 'State HWP — TRF prefix, marked cars 610–629, Q cars 630–639.' },
   { id: 'port',    icon: '🛡️', name: 'PORT',                      desc: 'Public Order Response Team. POR prefix, 600–899.' },
   { id: 'ciu',     icon: '🔍', name: 'CIU',                      desc: 'Criminal Investigation Unit. 500–599.' },
   { id: 'fviu',    icon: '🏠', name: 'FVIU',                     desc: 'Family Violence Investigation Unit. 480–499.' },
@@ -98,6 +98,7 @@ const SERVICES = [
   { id: 'polair',  icon: '🚁', name: 'Air Wing',                   desc: 'Helicopters and fixed wing aircraft.' },
   { id: 'hviu',    icon: '🚛', name: 'Heavy Vehicle Unit',  desc: 'Heavy vehicle enforcement. ROA prefix.' },
   { id: 'mounted', icon: '🐴', name: 'Mounted Branch',      desc: 'Mounted unit. MOU prefix, 800–899.' },
+  { id: 'cri',     icon: '📷', name: 'Crime Desk',           desc: 'Crime scene coordination, photography & forensics. CRI prefix, 571–579.' },
 ];
 
 
@@ -120,7 +121,7 @@ const DEFAULTS = {
 
 // Maximum units each scalable service pool can produce.
 // Should match the pool sizes in the builders below.
-const MAX_UNITS = { cars: 15, vans: 6, hwp: 22, trf: 22, ciu: 11, rru: 5, hwp_solo: 4, trf_solo: 4 };
+const MAX_UNITS = { cars: 15, vans: 6, hwp: 23, trf: 23, ciu: 11, rru: 5, hwp_solo: 4, trf_solo: 4 };
 
 
 // =============================================================================
@@ -180,23 +181,26 @@ function buildVanPool(c) {
 // SGT/S/SGT tagged SUP so they are lifted into Command & Supervision.
 // Special duties appear at higher counts.
 function buildHWPPool(c) {
-  const ms  = shuffle([611, 612, 613, 614].map(n => ({ cs: c + n, desc: 'HWP Marked Car',          shifts: ['MS'] })));
-  const as  = shuffle([616, 617, 618, 619].map(n => ({ cs: c + n, desc: 'HWP Marked Car',          shifts: ['AS'] })));
-  const ns  = shuffle([621, 622, 623, 624].map(n => ({ cs: c + n, desc: 'HWP Marked Car',          shifts: ['NS'] })));
-  const q   = shuffle([630, 631, 632, 633].map(n => ({ cs: c + n, desc: 'HWP Q Car (unmarked)',    shifts: ['MS', 'AS'] })));
-  const spd = shuffle([670, 671, 672, 673, 674, 675].map(n => ({ cs: c + n, desc: 'HWP Special Duties', shifts: ['MS', 'AS'] })));
+  // CAD doc ranges: 610–629 marked cars, 630–639 Q cars (unmarked),
+  // 650–659 SGT, 660–669 S/SGT, 670–699 special duties.
+  // No NS sub-range is defined — 610–629 spans all shifts.
+  const marked = shuffle([611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626].map(
+    n => ({ cs: c + n, desc: 'HWP Marked Car', shifts: ['MS', 'AS', 'NS'] })
+  ));
+  const q   = shuffle([630, 631, 632, 633, 634, 635].map(n => ({ cs: c + n, desc: 'HWP Q Car (unmarked)',    shifts: ['MS', 'AS'] })));
+  const spd = shuffle([670, 671, 672, 673, 674, 675].map(n => ({ cs: c + n, desc: 'HWP Special Duties',     shifts: ['MS', 'AS'] })));
   const sgt = [
-    { cs: c + shuffle([650, 651, 652, 653])[0], desc: 'HWP Sergeant',        shifts: ['SUP'] },
-    { cs: c + shuffle([654, 655, 656, 657])[0], desc: 'HWP Sergeant',        shifts: ['SUP'] },
-    { cs: c + shuffle([660, 661, 662, 663])[0], desc: 'HWP Senior Sergeant', shifts: ['SUP'] },
+    { cs: c + '650', desc: 'HWP Sergeant',        shifts: ['SUP'] },
+    { cs: c + '651', desc: 'HWP Sergeant',        shifts: ['SUP'] },
+    { cs: c + '660', desc: 'HWP Senior Sergeant', shifts: ['SUP'] },
   ];
   return [
-    ms[0], as[0], ns[0], q[0],   //  1–4  : core patrol
-    ms[1], as[1], ns[1], q[1],   //  5–8
-    ms[2], as[2], ns[2], q[2],   //  9–12
-    ms[3], as[3], ns[3], q[3],   // 13–16 : extended patrol
-    ...sgt,                       // 17–19 : supervisors (lifted to Command & Supervision)
-    spd[0], spd[1],              // 20–21 : special duties
+    marked[0], marked[1], marked[2], marked[3], q[0],   //  1–5  : core patrol
+    marked[4], marked[5], marked[6], marked[7], q[1],   //  6–10
+    marked[8], marked[9], marked[10], marked[11], q[2], // 11–15
+    marked[12], marked[13], q[3],                       // 16–18 : extended patrol
+    ...sgt,                                             // 19–21 : supervisors (lifted to Command & Supervision)
+    spd[0], spd[1],                                     // 22–23 : special duties
     { cs: c + '906', desc: 'HWP Base Station (fixed)', shifts: ['FIXED'] },
   ];
 }
@@ -209,25 +213,27 @@ function buildHWPSoloUnits(c) {
 // buildTRFPool — same structure as HWP but with TRF prefix.
 // SGT/S/SGT tagged SUP so they are lifted into Command & Supervision.
 // Special duties appear at higher counts.
+// Note: TRF is a state-level unit; no dedicated base station callsign exists in the CAD doc.
 function buildTRFPool() {
-  const ms  = shuffle([611, 612, 613, 614].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',          shifts: ['MS'] })));
-  const as  = shuffle([616, 617, 618, 619].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',          shifts: ['AS'] })));
-  const ns  = shuffle([621, 622, 623, 624].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car',          shifts: ['NS'] })));
-  const q   = shuffle([630, 631, 632, 633].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Q Car (unmarked)',    shifts: ['MS', 'AS'] })));
-  const spd = shuffle([670, 671, 672, 673, 674, 675].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Special Duties', shifts: ['MS', 'AS'] })));
+  // CAD doc ranges: 610–629 marked cars, 630–639 Q cars,
+  // 650–659 SGT, 660–669 S/SGT, 670–699 special duties.
+  const marked = shuffle([611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626].map(
+    n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Marked Car', shifts: ['MS', 'AS', 'NS'] })
+  ));
+  const q   = shuffle([630, 631, 632, 633, 634, 635].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Q Car (unmarked)',    shifts: ['MS', 'AS'] })));
+  const spd = shuffle([670, 671, 672, 673, 674, 675].map(n => ({ cs: 'TRF' + n, desc: 'State Highway Patrol — Special Duties',     shifts: ['MS', 'AS'] })));
   const sgt = [
-    { cs: 'TRF' + shuffle([650, 651, 652, 653])[0], desc: 'State Highway Patrol — Sergeant',        shifts: ['SUP'] },
-    { cs: 'TRF' + shuffle([654, 655, 656, 657])[0], desc: 'State Highway Patrol — Sergeant',        shifts: ['SUP'] },
-    { cs: 'TRF' + shuffle([660, 661, 662, 663])[0], desc: 'State Highway Patrol — Senior Sergeant', shifts: ['SUP'] },
+    { cs: 'TRF650', desc: 'State Highway Patrol — Sergeant',        shifts: ['SUP'] },
+    { cs: 'TRF651', desc: 'State Highway Patrol — Sergeant',        shifts: ['SUP'] },
+    { cs: 'TRF660', desc: 'State Highway Patrol — Senior Sergeant', shifts: ['SUP'] },
   ];
   return [
-    ms[0], as[0], ns[0], q[0],
-    ms[1], as[1], ns[1], q[1],
-    ms[2], as[2], ns[2], q[2],
-    ms[3], as[3], ns[3], q[3],
+    marked[0], marked[1], marked[2], marked[3], q[0],
+    marked[4], marked[5], marked[6], marked[7], q[1],
+    marked[8], marked[9], marked[10], marked[11], q[2],
+    marked[12], marked[13], q[3],
     ...sgt,
     spd[0], spd[1],
-    { cs: 'TRF906', desc: 'State Highway Patrol Base (fixed)', shifts: ['FIXED'] },
   ];
 }
 
