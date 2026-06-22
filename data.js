@@ -59,7 +59,7 @@ const REGION_DATA = {
 };
 
 // Parse a pipe-delimited station entry string into a station object.
-// Format: CODE|Name|DivCode|PSA|PSALabel|HWP|CIU|classification
+// Format: CODE|Name|DivCode|PSA|PSALabel|HWP|HWPLabel|CIU|classification
 function parseStation(s) {
   const p = s.split('|');
   return {
@@ -69,8 +69,9 @@ function parseStation(s) {
     psa:            p[3] || '',
     psaLabel:       p[4] || '',
     hwp:            p[5] || '',
-    ciu:            p[6] || '',
-    classification: p[7] || 'metro_24',
+    hwpLabel:       p[6] || '',
+    ciu:            p[7] || '',
+    classification: p[8] || 'metro_24',
   };
 }
 
