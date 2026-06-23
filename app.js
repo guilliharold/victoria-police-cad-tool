@@ -18,8 +18,6 @@ const S = {
   hwp:           '',
   hwpLabel:      '',
   ciu:           '',
-  ciuLabel:      '',
-  services:      '',
   role:          'metro_24',
   selected:      new Set(),
 };
@@ -103,8 +101,6 @@ function ingestCSV(text) {
     const hwp            =  f[idx('hwp')]             || '';
     const hwpLabel       =  f[idx('hwp_label')]       || '';
     const ciu            =  f[idx('ciu')]             || '';
-    const ciuLabel       =  f[idx('ciu_label')]       || '';
-    const services       =  f[idx('services')]        || '';
     const classification =  f[idx('classification')]  || 'metro_24';
 
     if (!code || !name || !regionKey) continue;
@@ -121,9 +117,9 @@ function ingestCSV(text) {
     }
 
     // Push as a pipe-delimited entry matching the format in data.js
-    // Format: CODE|Name|DivCode|PSA|PSALabel|HWP|HWPLabel|CIU|CIULabel|Services|classification
+    // Format: CODE|Name|DivCode|PSA|PSALabel|HWP|HWPLabel|CIU|classification
     REGION_DATA[regionKey].divisions[divisionName].push(
-      `${code}|${name}|${divCode}|${psa}|${psaLabel}|${hwp}|${hwpLabel}|${ciu}|${ciuLabel}|${services}|${classification}`
+      `${code}|${name}|${divCode}|${psa}|${psaLabel}|${hwp}|${hwpLabel}|${ciu}|${classification}`
     );
   }
 
@@ -218,6 +214,10 @@ function onStation() {
     if (st.classification) {
       document.getElementById('knownRole').value = st.classification;
     }
+    // Default supervisor to No for single-member and non-24-hour stations,
+    // Yes for everything else. Can always be manually overridden.
+    const noSuper = ['regional_single', 'regional_non24'].includes(st.classification);
+    document.getElementById('superRequired').value = noSuper ? 'no' : 'yes';
   }
 }
 
@@ -233,8 +233,6 @@ function goStep2() {
   S.hwp           = st.hwp;
   S.hwpLabel      = st.hwpLabel;
   S.ciu           = st.ciu;
-  S.ciuLabel      = st.ciuLabel;
-  S.services      = st.services;
   S.role          = document.getElementById('knownRole').value;
 
   const r = document.getElementById('selRegion').value;
@@ -270,50 +268,31 @@ function buildServiceGrid() {
   const g = document.getElementById('svcGrid');
   g.innerHTML = '';
 
-  // Build allowed set from S.services. null means no restriction (all allowed).
-  const allowedSet = S.services
-    ? new Set(S.services.trim().split(/\s+/))
-    : null;
-
-  const isAllowed = (id) => !allowedSet || allowedSet.has(id);
-
   SERVICES.forEach(sv => {
-    const allowed  = isAllowed(sv.id);
-    const selected = S.selected.has(sv.id);
-
-    // If previously selected but no longer allowed, silently deselect
-    if (!allowed && selected) {
-      S.selected.delete(sv.id);
-      if (SOLO_CARDS[sv.id]) S.selected.delete(SOLO_CARDS[sv.id].id);
-    }
-
+    // Main service card
     const el = document.createElement('div');
-    el.className = 'svc-item'
-      + (selected && allowed ? ' on' : '')
-      + (!allowed ? ' svc-item--disabled' : '');
+    el.className = 'svc-item' + (S.selected.has(sv.id) ? ' on' : '');
     el.dataset.id = sv.id;
     el.innerHTML = `
-      <div class="svc-check">${selected && allowed ? '✓' : ''}</div>
+      <div class="svc-check">${S.selected.has(sv.id) ? '✓' : ''}</div>
       <div class="svc-text">
         <div class="svc-name">${sv.icon} ${sv.name}</div>
-        ${!allowed ? '<div class="svc-unavailable">Not available at this station</div>' : ''}
       </div>`;
-
-    if (allowed) {
-      el.onclick = () => {
-        if (S.selected.has(sv.id)) {
-          S.selected.delete(sv.id);
-          if (SOLO_CARDS[sv.id]) S.selected.delete(SOLO_CARDS[sv.id].id);
-        } else {
-          S.selected.add(sv.id);
-        }
-        buildServiceGrid();
-      };
-    }
+    el.onclick = () => {
+      if (S.selected.has(sv.id)) {
+        S.selected.delete(sv.id);
+        // Also deselect the solo card if the parent is deselected
+        if (SOLO_CARDS[sv.id]) S.selected.delete(SOLO_CARDS[sv.id].id);
+      } else {
+        S.selected.add(sv.id);
+      }
+      // Rebuild the grid so the solo card appears/disappears in the right position
+      buildServiceGrid();
+    };
     g.appendChild(el);
 
-    // Solo card — only shown if parent is selected AND allowed
-    if (SOLO_CARDS[sv.id] && S.selected.has(sv.id) && allowed) {
+    // If this service is selected and has a solo card, inject it right after
+    if (SOLO_CARDS[sv.id] && S.selected.has(sv.id)) {
       const solo   = SOLO_CARDS[sv.id];
       const soloOn = S.selected.has(solo.id);
       const soloEl = document.createElement('div');
@@ -438,6 +417,11 @@ function buildOutput() {
       ...(S.selected.has('sar')     ? [{ cs: 'RES451', desc: 'SAR Sergeant',                   shifts: ['SUP'] }] : []),
       ...(S.selected.has('sog')     ? [{ cs: 'SCY250', desc: 'SOG Sergeant',                   shifts: ['SUP'] }] : []),
       ...(S.selected.has('cirt')    ? [{ cs: 'CIR250', desc: 'CIRT Sergeant',                  shifts: ['SUP'] }] : []),
+      ...(S.selected.has('polair')  ? [
+        { cs: 'AIR451', desc: 'Air Wing Sergeant',        shifts: ['SUP'] },
+        { cs: 'AIR452', desc: 'Air Wing Sergeant',        shifts: ['SUP'] },
+        { cs: 'AIR46',  desc: 'Air Wing Senior Sergeant', shifts: ['SUP'] },
+      ] : []),
       ...(S.selected.has('hviu')    ? [{ cs: 'ROA550', desc: 'Heavy Vehicle Supervisor',       shifts: ['SUP'] }] : []),
       ...(S.selected.has('mounted') ? [{ cs: 'MOU850', desc: 'Mounted Sergeant',               shifts: ['SUP'] }] : []),
       ...(S.selected.has('cri')     ? [
@@ -573,6 +557,15 @@ function buildOutput() {
     });
   }
 
+  if (S.selected.has('polair')) {
+    const pool = buildPOLAIRPool();
+    sections.push({
+      id: 'polair', outputName: 'POLAIR (Air Wing)', icon: '🚁', name: 'Air Wing',
+      units: pool, scalable: true,
+      note: 'POLAIR30–32 (rotary wing), POLAIR35 (fixed wing). Used for patrol, traffic enforcement, search/rescue, fire observation and urgent transport. SGT: AIR451/AIR452. S/SGT: AIR46. State-wide asset.',
+    });
+  }
+
   if (S.selected.has('hviu')) {
     const pool = buildHVIUPool();
     sections.push({
@@ -648,11 +641,10 @@ function renderOutput(code, role, roleLabel, sections) {
   if (S.psa || S.hwp || S.ciu) {
     const psaDisplay = S.psaLabel ? `${S.psaLabel} (${S.psa})` : resolveStationLabel(S.psa);
     const hwpDisplay = S.hwpLabel ? `${S.hwpLabel} (${S.hwp})` : resolveStationLabel(S.hwp);
-    const ciuDisplay = S.ciuLabel ? `${S.ciuLabel} (${S.ciu})` : resolveStationLabel(S.ciu);
     const linkItems = [
       S.psa ? `<div class="link-item"><div class="link-key">Police Service Area (PSA)</div><div class="link-val">${psaDisplay}</div></div>` : '',
       S.hwp ? `<div class="link-item"><div class="link-key">Highway Patrol (HWP)</div><div class="link-val">${hwpDisplay}</div></div>` : '',
-      S.ciu ? `<div class="link-item"><div class="link-key">Crime Investigation Unit (CIU)</div><div class="link-val">${ciuDisplay}</div></div>` : '',
+      S.ciu ? `<div class="link-item"><div class="link-key">Crime Investigation Unit (CIU)</div><div class="link-val">${resolveStationLabel(S.ciu)}</div></div>` : '',
     ].filter(Boolean).join('');
     linksHtml = `<div class="card" style="margin-bottom:14px">
       <div class="card-head"><div class="dot"></div>Station Support Links</div>
@@ -783,13 +775,10 @@ function buildExportText(code, role, roleLabel, sections) {
   });
 
   if (S.psa || S.hwp || S.ciu) {
-    const psaDisplay = S.psaLabel ? `${S.psaLabel} (${S.psa})` : resolveStationLabel(S.psa);
-    const hwpDisplay = S.hwpLabel ? `${S.hwpLabel} (${S.hwp})` : resolveStationLabel(S.hwp);
-    const ciuDisplay = S.ciuLabel ? `${S.ciuLabel} (${S.ciu})` : resolveStationLabel(S.ciu);
     exp += `STATION SUPPORT LINKS\n`;
-    if (S.psa) exp += `  Police Service Area (PSA)      : ${psaDisplay}\n`;
-    if (S.hwp) exp += `  Highway Patrol (HWP)           : ${hwpDisplay}\n`;
-    if (S.ciu) exp += `  Crime Investigation Unit (CIU)  : ${ciuDisplay}\n`;
+    if (S.psa) exp += `  Police Service Area (PSA)     : ${resolveStationLabel(S.psa)}\n`;
+    if (S.hwp) exp += `  Highway Patrol (HWP)          : ${resolveStationLabel(S.hwp)}\n`;
+    if (S.ciu) exp += `  Crime Investigation Unit (CIU) : ${resolveStationLabel(S.ciu)}\n`;
   }
 
   return exp;
