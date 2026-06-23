@@ -19,7 +19,7 @@ const S = {
   hwpLabel:      '',
   ciu:           '',
   ciuLabel:      '',
-  services:      '',   // space-separated list of allowed service IDs, blank = all
+  services:      '',
   role:          'metro_24',
   selected:      new Set(),
 };
@@ -103,6 +103,8 @@ function ingestCSV(text) {
     const hwp            =  f[idx('hwp')]             || '';
     const hwpLabel       =  f[idx('hwp_label')]       || '';
     const ciu            =  f[idx('ciu')]             || '';
+    const ciuLabel       =  f[idx('ciu_label')]       || '';
+    const services       =  f[idx('services')]        || '';
     const classification =  f[idx('classification')]  || 'metro_24';
 
     if (!code || !name || !regionKey) continue;
@@ -119,9 +121,9 @@ function ingestCSV(text) {
     }
 
     // Push as a pipe-delimited entry matching the format in data.js
-    // Format: CODE|Name|DivCode|PSA|PSALabel|HWP|HWPLabel|CIU|classification
+    // Format: CODE|Name|DivCode|PSA|PSALabel|HWP|HWPLabel|CIU|CIULabel|Services|classification
     REGION_DATA[regionKey].divisions[divisionName].push(
-      `${code}|${name}|${divCode}|${psa}|${psaLabel}|${hwp}|${hwpLabel}|${ciu}|${classification}`
+      `${code}|${name}|${divCode}|${psa}|${psaLabel}|${hwp}|${hwpLabel}|${ciu}|${ciuLabel}|${services}|${classification}`
     );
   }
 
@@ -268,10 +270,10 @@ function buildServiceGrid() {
   const g = document.getElementById('svcGrid');
   g.innerHTML = '';
 
-  // Build allowed set from S.services. Empty string means all services allowed.
+  // Build allowed set from S.services. null means no restriction (all allowed).
   const allowedSet = S.services
     ? new Set(S.services.trim().split(/\s+/))
-    : null; // null = no restriction
+    : null;
 
   const isAllowed = (id) => !allowedSet || allowedSet.has(id);
 
@@ -279,7 +281,7 @@ function buildServiceGrid() {
     const allowed  = isAllowed(sv.id);
     const selected = S.selected.has(sv.id);
 
-    // If previously selected but no longer allowed, deselect silently
+    // If previously selected but no longer allowed, silently deselect
     if (!allowed && selected) {
       S.selected.delete(sv.id);
       if (SOLO_CARDS[sv.id]) S.selected.delete(SOLO_CARDS[sv.id].id);
