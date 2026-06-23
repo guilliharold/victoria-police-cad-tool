@@ -124,13 +124,13 @@ ETT,Tatura,E,Eastern,Goulburn Valley (ED3),ED3,ESP,Greater Shepparton,ESP,Sheppa
 ECB,Cobram,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,ECB,Cobram,ECB,Cobram,cars vans hwp ciu,regional_non24
 EGE,Glenrowan,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,EWT,Wangaratta,EWT,Wangaratta,cars,regional_single
 EKT,Katamatite,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,ECB,Cobram,ECB,Cobram,cars,regional_single
-EMY,Moyhu,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,EWT,Wangaratta,EWT,Wangaratta,cars,regional_single
 EMD,Myrtleford,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,EWT,Wangaratta,EWT,Wangaratta,cars,regional_non24
-ENT,Nathalia,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,ECB,Cobram,ECB,Cobram,cars,regional_non24
+EMY,Moyhu,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,EWT,Wangaratta,EWT,Wangaratta,cars,regional_single
 ENM,Numurkah,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,ECB,Cobram,ECB,Cobram,cars vans,regional_non24
+ENT,Nathalia,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,ECB,Cobram,ECB,Cobram,cars,regional_non24
 ETH,Tungamah,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,ECB,Cobram,ECB,Cobram,cars,regional_single
-EWT,Wangaratta,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,EWT,Wangaratta,EWT,Wangaratta,cars vans hwp ciu,regional_24
 EWF,Whitfield,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,EWT,Wangaratta,EWT,Wangaratta,vans,regional_single
+EWT,Wangaratta,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,EWT,Wangaratta,EWT,Wangaratta,cars vans hwp ciu,regional_24
 EYW,Yarrawonga,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,ECB,Cobram,ECB,Cobram,cars vans,regional_non24
 # Morwell (ED5)
 TBC,Station TBC,E,Eastern,Morwell (ED5),ED5,,,,,,,,regional_24
