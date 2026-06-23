@@ -336,10 +336,12 @@ input[type="range"] {
   user-select: none;
   transition: border-color 0.15s, background 0.15s;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
-  /* Universal minimum height — all cards the same size regardless of text length */
-  min-height: 52px;
+  /* Fixed height — all cards identical whether available or not */
+  height: 52px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .svc-item:hover {
@@ -372,8 +374,11 @@ input[type="range"] {
 .svc-unavailable {
   font-size: 10px;
   color: var(--muted);
-  margin-top: 2px;
+  margin-top: 1px;
   font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .svc-check {
