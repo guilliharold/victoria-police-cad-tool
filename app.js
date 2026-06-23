@@ -45,7 +45,7 @@ setInterval(() => {
 //
 // CSV columns (header row required):
 //   code, name, region, region_label, division, div_code,
-//   psa, hwp, ciu, classification
+//   psa, psa_label, hwp, hwp_label, ciu, ciu_label, services, classification
 // =============================================================================
 async function loadCSV() {
   try {
@@ -341,7 +341,7 @@ function buildServiceGrid() {
 // =============================================================================
 function defaultCount(svcId) {
   const d = DEFAULTS[S.role] || DEFAULTS.metro_24;
-  return d[svcId] !== undefined ? d[svcId] : 3;
+  return d[svcId] || 3;
 }
 
 function generate() {
@@ -766,7 +766,7 @@ function onSlider(svcId, rawVal) {
 
   // Update total count in header
   const total = window._sections.reduce((a, s) => {
-    const du = s.units.filter(u => !u.shifts.includes('FIXED'));
+    const du = s.units.filter(u => !u.shifts.includes('FIXED') && !u.shifts.includes('SUP'));
     return a + (s.scalable ? (OVERRIDES[s.id] || defaultCount(s.id)) : du.length);
   }, 0);
   const tc = document.getElementById('totalCount');
