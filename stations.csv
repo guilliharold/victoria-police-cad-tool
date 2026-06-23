@@ -82,8 +82,6 @@
 #                                   One officer, one vehicle (station car or divisional van only)
 #                                   e.g. Dookie, Elmore, Katamatite, Sea Lake, Tungamah
 #
-# EXAMPLE ROW
-#   ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,Shepparton,ESP,Shepparton,ESP,Shepparton,,regional_24
 #
 # NOTES
 #   • Leave a field blank rather than writing N/A or — (just keep the comma).
@@ -119,7 +117,7 @@ TBC,Station TBC,E,Eastern,Knox (ED2),ED2,,,,,,,,metro_24
 # Goulburn Valley (ED3)
 ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,Shepparton,ESP,Shepparton,ESP,Shepparton,cars vans hwp ciu fviu socit,regional_24
 # Wangaratta (ED4)
-EWO,Wodonga,E,Eastern,Wangaratta (ED4),ED4,EWO,Wodonga,EWO,Wodonga,EWO,Wodonga,cars vans hwp ciu fvio socit,regional_24
+EWO,Wodonga,E,Eastern,Wangaratta (ED4),ED4,EWO,Wodonga,EWO,Wodonga,EWO,Wodonga,cars vans hwp ciu fviu socit,regional_24
 # Morwell (ED5)
 TBC,Station TBC,E,Eastern,Morwell (ED5),ED5,,,,,,,,regional_24
 # Bairnsdale (ED6)
@@ -127,10 +125,12 @@ EBL,Bairnsdale,E,Eastern,Bairnsdale (ED6),ED6,EBL,Bairnsdale,EBL,Bairnsdale,EBL,
 # ── WESTERN ──────────────────────────────────────────────────────────────────
 # Geelong (WD1)
 WCO,Corio,W,Western,Geelong (WD1),WD1,WGL,Geelong,WGL,Geelong,WGL,Geelong,cars vans trf,regional_24
+WGL,Geelong,W,Western,Geelong (WD1),WD1,WGL,Geelong,WGL,Geelong,WGL,Geelong,cars vans hwp ciu,regional_24
 # Warrnambool (WD2)
 TBC,Station TBC,W,Western,Warrnambool (WD2),WD2,,,,,,,,regional_24
 # Ballarat (WD3)
-TBC,Station TBC,W,Western,Ballarat (WD3),WD3,,,,,,,,regional_24
+WBA,Ballarat,W,Western,Ballarat (WD3),WD3,WBA,Ballarat,WBA,Ballarat,WBA,Ballarat,cars vans hwp ciu fviu socit,regional_non24
+WBW,Ballarat West,W,Western,Ballarat (WD3),WD3,WBA,Ballarat,WBA,Ballarat,WBA,Ballarat,cars vans,regional_24
 # Horsham (WD4)
 TBC,Station TBC,W,Western,Horsham (WD4),WD4,,,,,,,,regional_non24
 # Bendigo (WD5)
