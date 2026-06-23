@@ -74,8 +74,6 @@
 #                                   One officer, one vehicle (station car or divisional van only)
 #                                   e.g. Dookie, Elmore, Katamatite, Sea Lake, Tungamah
 #
-# EXAMPLE ROW
-#   ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,Shepparton,ESP,Shepparton,ESP,Shepparton,regional_24
 #
 # NOTES
 #   • Leave a field blank rather than writing N/A or — (just keep the comma).
@@ -85,13 +83,13 @@
 code,name,region,region_label,division,div_code,psa,psa_label,hwp,hwp_label,ciu,ciu_label,classification
 # ── NORTH WEST METRO ─────────────────────────────────────────────────────────
 # Melbourne (ND1)
-TBC,Station TBC,N,North West Metro,Melbourne (ND1),ND1,,,,,,,metro_24
+NMW,Melbourne West,N,North West Metro,Melbourne (ND1),ND1,NML,Melbourne,NML,Melbourne,NML,Melbourne,metro_24
 # Westgate (ND2)
-TBC,Station TBC,N,North West Metro,Westgate (ND2),ND2,,,,,,,metro_24
+NWB,Werribee,N,North West Metro,Westgate (ND2),ND2,NWY,Wyndham,NWY,Wyndham,NWY,Wyndham,metro_24
 # Brimbank (ND3)
-TBC,Station TBC,N,North West Metro,Brimbank (ND3),ND3,,,,,,,metro_24
+NMT,Melton,N,North West Metro,Brimbank (ND3),ND3,NMT,Melton,NMT,Melton,NMT,Melton,metro_24
 # Fawkner (ND4)
-TBC,Station TBC,N,North West Metro,Fawkner (ND4),ND4,,,,,,,metro_24
+NBM,Broadmeadows,N,North West Metro,Fawkner (ND4),ND4,NHU,Hume,NFK,Fawkner,NHU,Hume,metro_24
 # Diamond Creek (ND5)
 TBC,Station TBC,N,North West Metro,Diamond Creek (ND5),ND5,,,,,,,metro_24
 # ── SOUTHERN METRO ───────────────────────────────────────────────────────────
