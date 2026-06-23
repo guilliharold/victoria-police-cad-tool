@@ -341,7 +341,7 @@ function buildServiceGrid() {
 // =============================================================================
 function defaultCount(svcId) {
   const d = DEFAULTS[S.role] || DEFAULTS.metro_24;
-  return d[svcId] || 3;
+  return d[svcId] !== undefined ? d[svcId] : 3;
 }
 
 function generate() {
