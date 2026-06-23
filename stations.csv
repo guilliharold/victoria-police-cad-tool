@@ -119,14 +119,14 @@ TBC,Station TBC,E,Eastern,Knox (ED2),ED2,,,,,,,,metro_24
 # Goulburn Valley (ED3)
 ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,Shepparton,ESP,Shepparton,ESP,Shepparton,cars vans hwp ciu fviu socit,regional_24
 # Wangaratta (ED4)
-TBC,Station TBC,E,Eastern,Wangaratta (ED4),ED4,,,,,,,,regional_24
+EWO,Wodonga,E,Eastern,Wangaratta (ED4),ED4,EWO,Wodonga,EWO,Wodonga,EWO,Wodonga,cars vans hwp ciu fvio socit,regional_24
 # Morwell (ED5)
 TBC,Station TBC,E,Eastern,Morwell (ED5),ED5,,,,,,,,regional_24
 # Bairnsdale (ED6)
-TBC,Station TBC,E,Eastern,Bairnsdale (ED6),ED6,,,,,,,,regional_24
+EBL,Bairnsdale,E,Eastern,Bairnsdale (ED6),ED6,EBL,Bairnsdale,EBL,Bairnsdale,EBL,Bairnsdale,cars vans hwp ciu fviu socit,regional_24
 # ── WESTERN ──────────────────────────────────────────────────────────────────
 # Geelong (WD1)
-TBC,Station TBC,W,Western,Geelong (WD1),WD1,,,,,,,,regional_24
+WCO,Corio,W,Western,Geelong (WD1),WD1,WGL,Geelong,WGL,Geelong,WGL,Geelong,cars vans trf,regional_24
 # Warrnambool (WD2)
 TBC,Station TBC,W,Western,Warrnambool (WD2),WD2,,,,,,,,regional_24
 # Ballarat (WD3)
