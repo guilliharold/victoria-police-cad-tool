@@ -145,10 +145,11 @@ WBW,Ballarat West,W,Western,Ballarat (WD3),WD3,WBA,Ballarat,WBA,Ballarat,WBA,Bal
 WHM,Horsham,W,Western,Horsham (WD4),WD4,WHM,Horsham,WHM,Horsham,WHM,Horsham,cars vans hwp ciu,regional_non24
 # Bendigo (WD5)
 WEC,Echuca,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars vans hwp ciu,regional_non24
+WEL,Elmore,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars,regional_single
 WGO,Gunbower,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars,regional_single
 WKA,Kyabram,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars vans,regional_non24
-WRC,Rochester,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars,regional_non24
-WRH,Rushworth,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars,regional_non24
+WRC,Rochester,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars vans,regional_non24
+WRH,Rushworth,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars vans,regional_non24
 WST,Stanhope,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars,regional_single
 WTO,Tongala,W,Western,Bendigo (WD5),WD5,WCP,Campaspe,WCP,Campaspe,WCP,Campaspe,cars,regional_single
 # Mildura (WD6)
