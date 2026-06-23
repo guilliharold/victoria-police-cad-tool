@@ -357,6 +357,25 @@ input[type="range"] {
   border-color: var(--blue);
 }
 
+.svc-item--disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.svc-item--disabled:hover {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.svc-unavailable {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-style: italic;
+}
+
 .svc-check {
   width: 18px;
   height: 18px;
