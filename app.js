@@ -18,6 +18,8 @@ const S = {
   hwp:           '',
   hwpLabel:      '',
   ciu:           '',
+  ciuLabel:      '',
+  services:      '',   // space-separated list of allowed service IDs, blank = all
   role:          'metro_24',
   selected:      new Set(),
 };
@@ -229,6 +231,8 @@ function goStep2() {
   S.hwp           = st.hwp;
   S.hwpLabel      = st.hwpLabel;
   S.ciu           = st.ciu;
+  S.ciuLabel      = st.ciuLabel;
+  S.services      = st.services;
   S.role          = document.getElementById('knownRole').value;
 
   const r = document.getElementById('selRegion').value;
@@ -264,31 +268,50 @@ function buildServiceGrid() {
   const g = document.getElementById('svcGrid');
   g.innerHTML = '';
 
+  // Build allowed set from S.services. Empty string means all services allowed.
+  const allowedSet = S.services
+    ? new Set(S.services.trim().split(/\s+/))
+    : null; // null = no restriction
+
+  const isAllowed = (id) => !allowedSet || allowedSet.has(id);
+
   SERVICES.forEach(sv => {
-    // Main service card
+    const allowed  = isAllowed(sv.id);
+    const selected = S.selected.has(sv.id);
+
+    // If previously selected but no longer allowed, deselect silently
+    if (!allowed && selected) {
+      S.selected.delete(sv.id);
+      if (SOLO_CARDS[sv.id]) S.selected.delete(SOLO_CARDS[sv.id].id);
+    }
+
     const el = document.createElement('div');
-    el.className = 'svc-item' + (S.selected.has(sv.id) ? ' on' : '');
+    el.className = 'svc-item'
+      + (selected && allowed ? ' on' : '')
+      + (!allowed ? ' svc-item--disabled' : '');
     el.dataset.id = sv.id;
     el.innerHTML = `
-      <div class="svc-check">${S.selected.has(sv.id) ? '✓' : ''}</div>
+      <div class="svc-check">${selected && allowed ? '✓' : ''}</div>
       <div class="svc-text">
         <div class="svc-name">${sv.icon} ${sv.name}</div>
+        ${!allowed ? '<div class="svc-unavailable">Not available at this station</div>' : ''}
       </div>`;
-    el.onclick = () => {
-      if (S.selected.has(sv.id)) {
-        S.selected.delete(sv.id);
-        // Also deselect the solo card if the parent is deselected
-        if (SOLO_CARDS[sv.id]) S.selected.delete(SOLO_CARDS[sv.id].id);
-      } else {
-        S.selected.add(sv.id);
-      }
-      // Rebuild the grid so the solo card appears/disappears in the right position
-      buildServiceGrid();
-    };
+
+    if (allowed) {
+      el.onclick = () => {
+        if (S.selected.has(sv.id)) {
+          S.selected.delete(sv.id);
+          if (SOLO_CARDS[sv.id]) S.selected.delete(SOLO_CARDS[sv.id].id);
+        } else {
+          S.selected.add(sv.id);
+        }
+        buildServiceGrid();
+      };
+    }
     g.appendChild(el);
 
-    // If this service is selected and has a solo card, inject it right after
-    if (SOLO_CARDS[sv.id] && S.selected.has(sv.id)) {
+    // Solo card — only shown if parent is selected AND allowed
+    if (SOLO_CARDS[sv.id] && S.selected.has(sv.id) && allowed) {
       const solo   = SOLO_CARDS[sv.id];
       const soloOn = S.selected.has(solo.id);
       const soloEl = document.createElement('div');
