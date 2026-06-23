@@ -117,7 +117,7 @@ const SERVICES = [
 const DEFAULTS = {
   metro_24:       { cars: 12, vans: 6, hwp: 10, trf: 10, ciu: 10, rru: 5, hwp_solo: 2, trf_solo: 2, fviu: 3, socit: 3, dog: 2, sar: 2, sog: 2, cirt: 2, hviu: 3, mounted: 2, cri: 3 },
   metro_non24:    { cars: 7,  vans: 3, hwp: 5,  trf: 5,  ciu: 5,  rru: 3, hwp_solo: 1, trf_solo: 1, fviu: 2, socit: 2, dog: 1, sar: 1, sog: 1, cirt: 1, hviu: 2, mounted: 1, cri: 2 },
-  regional_24:    { cars: 9,  vans: 4, hwp: 7,  trf: 6,  ciu: 7,  rru: 4, hwp_solo: 2, trf_solo: 2, fviu: 2, socit: 2, dog: 2, sar: 2, sog: 2, cirt: 2, hviu: 2, mounted: 2, cri: 2 },
+  regional_24:    { cars: 6,  vans: 2, hwp: 3,  trf: 3,  ciu: 1,  rru: 0, hwp_solo: 0, trf_solo: 0, fviu: 2, socit: 2, dog: 0, sar: 0, sog: 0, cirt: 0, hviu: 0, mounted: 0, cri: 0 },
   regional_non24: { cars: 3,  vans: 2, hwp: 2,  trf: 2,  ciu: 2,  rru: 2, hwp_solo: 1, trf_solo: 1, fviu: 1, socit: 1, dog: 1, sar: 1, sog: 1, cirt: 1, hviu: 1, mounted: 1, cri: 1 },
   regional_single:{ cars: 1,  vans: 1, hwp: 1,  trf: 1,  ciu: 1,  rru: 1, hwp_solo: 1, trf_solo: 1, fviu: 1, socit: 1, dog: 1, sar: 1, sog: 1, cirt: 1, hviu: 1, mounted: 1, cri: 1 },
 };
