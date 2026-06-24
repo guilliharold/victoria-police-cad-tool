@@ -91,7 +91,7 @@
 code,name,region,region_label,division,div_code,psa,psa_label,hwp,hwp_label,ciu,ciu_label,services,classification
 # ── NORTH WEST METRO ─────────────────────────────────────────────────────────
 # Melbourne (ND1)
-TBC,Station TBC,N,North West Metro,Melbourne (ND1),ND1,,,,,,,,metro_24
+NMW,Melbourne West,N,North West Metro,Melbourne (ND1),ND1,NML,Melbourne,NML,Melbourne,NML,Melbourne,cars vans hwp fviu socit,metro_24
 # Westgate (ND2)
 TBC,Station TBC,N,North West Metro,Westgate (ND2),ND2,,,,,,,,metro_24
 # Brimbank (ND3)
@@ -111,9 +111,9 @@ TBC,Station TBC,S,Southern Metro,Dandenong (SD3),SD3,,,,,,,,metro_24
 TBC,Station TBC,S,Southern Metro,Frankston (SD4),SD4,,,,,,,,metro_24
 # ── EASTERN ──────────────────────────────────────────────────────────────────
 # Nunawading (ED1)
-TBC,Station TBC,E,Eastern,Nunawading (ED1),ED1,,,,,,,,metro_24
+EFH,Forest Hill,E,Eastern,Nunawading (ED1),ED1,EWH,Whitehorse,ENG,Nunawading,EWH,Whitehorse,,metro_24
 # Knox (ED2)
-TBC,Station TBC,E,Eastern,Knox (ED2),ED2,,,,,,,,metro_24
+EKX,Knox,E,Eastern,Knox (ED2),ED2,EKX,Knox,EKX,Knox,EKX,Knox,cars vans hwp ciu,metro_24
 # Goulburn Valley (ED3)
 EBN,Benalla,E,Eastern,Goulburn Valley (ED3),ED3,EBN,Benalla,EBN,Benalla,EBN,Benalla,cars vans hwp ciu socit,regional_24
 ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,Greater Shepparton,ESP,Shepparton,ESP,Shepparton,cars vans hwp ciu fviu socit,regional_24
@@ -121,9 +121,9 @@ ESP,Shepparton,E,Eastern,Goulburn Valley (ED3),ED3,ESP,Greater Shepparton,ESP,Sh
 EWO,Wodonga,E,Eastern,Wangaratta (ED4),ED4,EWO,Wodonga,EWO,Wodonga,EWO,Wodonga,cars vans hwp ciu fviu socit,regional_24
 EWT,Wangaratta,E,Eastern,Wangaratta (ED4),ED4,EWT,Wangaratta,EWT,Wangaratta,EWT,Wangaratta,cars vans hwp ciu,regional_24
 # Morwell (ED5)
-TBC,Station TBC,E,Eastern,Morwell (ED5),ED5,,,,,,,,regional_24
+EML,Morwell,E,Eastern,Morwell (ED5),ED5,ELT,Latrobe,ELT,Latrobe,ELT,Latrobe,cars vans hwp ciu,regional_24
 # Bairnsdale (ED6)
-EBL,Bairnsdale,E,Eastern,Bairnsdale (ED6),ED6,EBL,Bairnsdale,EBL,Bairnsdale,EBL,Bairnsdale,cars vans hwp ciu fviu socit,regional_24
+TBC,Station TBC,E,Eastern,Bairnsdale (ED6),ED6,,,,,,,,regional_24
 # ── WESTERN ──────────────────────────────────────────────────────────────────
 # Geelong (WD1)
 WGL,Geelong,W,Western,Geelong (WD1),WD1,WGL,Geelong,WGL,Geelong,WGL,Geelong,cars vans hwp ciu,regional_24
